@@ -4,6 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.setupSocketIO = setupSocketIO;
+exports.setActiveSocketIO = setActiveSocketIO;
+exports.broadcastFileEvent = broadcastFileEvent;
 const cookie_1 = __importDefault(require("cookie"));
 const shared_1 = require("@android-server/shared");
 const auth_service_1 = require("../auth/auth-service");
@@ -89,4 +91,16 @@ function setupSocketIO(io) {
             console.error('[SOCKET] Telemetry broadcast error:', err);
         }
     }, 1000);
+}
+let activeSocketIO = null;
+function setActiveSocketIO(io) {
+    activeSocketIO = io;
+}
+function broadcastFileEvent(event) {
+    if (activeSocketIO) {
+        activeSocketIO.emit('files:changed', {
+            ...event,
+            timestamp: Date.now(),
+        });
+    }
 }

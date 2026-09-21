@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'OPPO Android Server Console',
+  title: 'Phone NAS Server Console',
   description: 'Self-hosted Android NAS, Terminal and Remote Management Platform',
 };
 

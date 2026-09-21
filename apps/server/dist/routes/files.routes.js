@@ -10,10 +10,11 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const rbac_middleware_1 = require("../security/rbac-middleware");
 const shared_1 = require("@android-server/shared");
-const file_service_1 = require("../files/file-service");
 const path_guard_1 = require("../files/path-guard");
+const file_service_1 = require("../files/file-service");
 const upload_middleware_1 = require("../files/upload-middleware");
 const audit_service_1 = require("../audit/audit-service");
+const socket_handler_1 = require("../sockets/socket-handler");
 exports.filesRouter = (0, express_1.Router)();
 // GET /api/files/list
 exports.filesRouter.get('/list', (0, rbac_middleware_1.requirePermission)(shared_1.PERMISSIONS.FILES_READ), async (req, res) => {
@@ -45,6 +46,7 @@ exports.filesRouter.post('/create-folder', (0, rbac_middleware_1.requirePermissi
             details: { type: 'directory' },
         });
         res.json({ message: 'Folder created.', item });
+        (0, socket_handler_1.broadcastFileEvent)({ path: item.path, action: 'create' });
     }
     catch (err) {
         res.status(400).json({ error: err.message });
@@ -71,6 +73,7 @@ exports.filesRouter.post('/upload', (0, rbac_middleware_1.requirePermission)(sha
             });
         }
         res.json({ message: 'Files uploaded successfully.', files: uploaded });
+        (0, socket_handler_1.broadcastFileEvent)({ path: targetPath, action: 'upload' });
     }
     catch (err) {
         res.status(400).json({ error: err.message });
@@ -119,6 +122,7 @@ exports.filesRouter.delete('/delete', (0, rbac_middleware_1.requirePermission)(s
             ipAddress: req.ip || '',
         });
         res.json({ message: 'Item deleted successfully.' });
+        (0, socket_handler_1.broadcastFileEvent)({ path: targetPath, action: 'delete' });
     }
     catch (err) {
         res.status(400).json({ error: err.message });
@@ -142,6 +146,7 @@ exports.filesRouter.post('/rename', (0, rbac_middleware_1.requirePermission)(sha
             ipAddress: req.ip || '',
         });
         res.json({ message: 'Item renamed.', item: updated });
+        (0, socket_handler_1.broadcastFileEvent)({ path: updated.path, action: 'rename' });
     }
     catch (err) {
         res.status(400).json({ error: err.message });
@@ -165,6 +170,7 @@ exports.filesRouter.post('/move', (0, rbac_middleware_1.requirePermission)(share
             ipAddress: req.ip || '',
         });
         res.json({ message: 'Item moved successfully.' });
+        (0, socket_handler_1.broadcastFileEvent)({ path: destinationFolder, action: 'move' });
     }
     catch (err) {
         res.status(400).json({ error: err.message });
@@ -184,6 +190,7 @@ exports.filesRouter.post('/copy', (0, rbac_middleware_1.requirePermission)(share
             ipAddress: req.ip || '',
         });
         res.json({ message: 'Item copied successfully.' });
+        (0, socket_handler_1.broadcastFileEvent)({ path: destinationFolder, action: 'copy' });
     }
     catch (err) {
         res.status(400).json({ error: err.message });

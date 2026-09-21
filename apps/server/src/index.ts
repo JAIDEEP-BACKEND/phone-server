@@ -39,6 +39,25 @@ async function bootstrap() {
 
   setAuditSocketIO(io);
   setupSocketIO(io);
+  const { setActiveSocketIO, broadcastFileEvent } = require('./sockets/socket-handler');
+  setActiveSocketIO(io);
+
+  // Storage filesystem live watcher for real-time instant syncing
+  try {
+    if (fs.existsSync(CONFIG.STORAGE_ROOT)) {
+      let watchDebounce: any = null;
+      fs.watch(CONFIG.STORAGE_ROOT, { recursive: true }, (event, filename) => {
+        if (!filename || filename.startsWith('.') || filename.includes('.nas_temp_uploads')) return;
+        if (watchDebounce) clearTimeout(watchDebounce);
+        watchDebounce = setTimeout(() => {
+          broadcastFileEvent({ path: '/' + filename.replace(/\\/g, '/'), action: event });
+        }, 300);
+      });
+      console.log(`[WATCHER] Active real-time storage sync enabled on ${CONFIG.STORAGE_ROOT}`);
+    }
+  } catch (err: any) {
+    console.log('[WATCHER] Native recursive watch not available, relying on event triggers.');
+  }
 
   // 3. Security & Middleware
   app.use(
@@ -99,7 +118,7 @@ async function bootstrap() {
   server.listen(CONFIG.PORT, CONFIG.HOST, () => {
     const deviceInfo = DeviceInfoService.getDeviceInfo();
     console.log('====================================================');
-    console.log('  OPPO ANDROID NAS & PERSONAL SERVER - ACTIVE');
+    console.log('  PHONE ANDROID NAS & PERSONAL SERVER - ACTIVE');
     console.log('====================================================');
     console.log(`  Local Address:     http://localhost:${CONFIG.PORT}`);
     console.log(`  LAN IP Address:    http://${deviceInfo.ipAddress}:${CONFIG.PORT}`);
@@ -114,7 +133,16 @@ async function bootstrap() {
   });
 }
 
+// Global Crash Guard so unexpected network drops never crash the Termux server
+process.on('uncaughtException', (err) => {
+  console.error('[CRASH_GUARD] Uncaught Exception intercepted:', err);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[CRASH_GUARD] Unhandled Rejection intercepted:', reason);
+});
+
 bootstrap().catch((err) => {
   console.error('[FATAL] Failed to start server:', err);
   process.exit(1);
 });
+

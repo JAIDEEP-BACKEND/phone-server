@@ -9,8 +9,8 @@ const fs_1 = __importDefault(require("fs"));
 const child_process_1 = require("child_process");
 class DeviceInfoService {
     static getDeviceInfo() {
-        let manufacturer = 'OPPO';
-        let model = 'CPH2219 (OPPO)';
+        let manufacturer = 'Android';
+        let model = 'Phone Host';
         let androidVersion = '14';
         let sdkInt = 34;
         try {

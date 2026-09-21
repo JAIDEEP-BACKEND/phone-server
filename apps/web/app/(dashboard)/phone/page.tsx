@@ -33,7 +33,7 @@ export default function PhonePage() {
           Device Hardware & Environment
         </h1>
         <p className="font-mono text-xs text-fg-muted">
-          OPPO host specifications, kernel release, and local network addresses
+          Android host specifications, kernel release, and local network addresses
         </p>
       </div>
 
@@ -47,12 +47,12 @@ export default function PhonePage() {
         <div className="grid grid-cols-1 gap-y-3 gap-x-8 sm:grid-cols-2 lg:grid-cols-3 font-mono text-xs">
           <div className="flex justify-between border-b border-border/50 pb-2">
             <span className="text-fg-muted">MANUFACTURER:</span>
-            <span className="font-semibold text-fg">{deviceInfo?.manufacturer || 'OPPO'}</span>
+            <span className="font-semibold text-fg">{deviceInfo?.manufacturer || 'Android'}</span>
           </div>
 
           <div className="flex justify-between border-b border-border/50 pb-2">
             <span className="text-fg-muted">MODEL:</span>
-            <span className="font-semibold text-fg">{deviceInfo?.model || 'CPH2219'}</span>
+            <span className="font-semibold text-fg">{deviceInfo?.model || 'Phone Host'}</span>
           </div>
 
           <div className="flex justify-between border-b border-border/50 pb-2">
@@ -114,7 +114,7 @@ export default function PhonePage() {
             <span>Hotspot Connection</span>
           </div>
           <p className="text-fg-muted text-[11px] leading-relaxed">
-            When your OPPO phone hotspot is turned on, the gateway IP is <code>192.168.43.1</code>. Connect your PC to the phone hotspot and access the console at <code>http://192.168.43.1:3001</code>.
+            When your phone hotspot is turned on, the gateway IP is <code>192.168.43.1</code>. Connect your PC to the phone hotspot and access the console at <code>http://192.168.43.1:3001</code>.
           </p>
         </div>
       </div>

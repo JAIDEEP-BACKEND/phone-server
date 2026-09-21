@@ -6,10 +6,10 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$PROJECT_ROOT"
 
 echo "=========================================================="
-echo "  OPPO ANDROID NAS & PERSONAL SERVER"
+echo "  ANDROID PHONE NAS & PERSONAL SERVER"
 echo "=========================================================="
 
-# 1. Acquire Termux wake lock so ColorOS/Android doesn't freeze CPU
+# 1. Acquire Termux wake lock so Android doesn't put CPU to sleep
 if command -v termux-wake-lock &> /dev/null; then
   echo "[POWER] Acquiring Termux Wake Lock..."
   termux-wake-lock
@@ -17,7 +17,7 @@ fi
 
 # 2. Check for missing dependencies
 if [ ! -d "node_modules/express" ] && [ ! -d "apps/server/node_modules/express" ]; then
-  echo "[DEPENDENCIES] Packages not found. Running npm install --omit=dev..."
+  echo "[DEPENDENCIES] Installing production packages in Termux..."
   npm install --omit=dev
 fi
 
@@ -61,7 +61,17 @@ if [ -n "$WLAN_IP" ]; then
 fi
 echo "  Local Device:         http://localhost:$PORT"
 echo "=========================================================="
+echo "  [TIP] To prevent Android from ever closing the server:"
+echo "  Go to Android Settings -> Apps -> Termux -> Battery"
+echo "  and set to 'Unrestricted' (Allow background activity)."
+echo "=========================================================="
 echo ""
 
-# 5. Start Server
-exec node apps/server/dist/index.js
+# 5. Persistent Supervisor Loop (Auto-restarts if process ever exits)
+while true; do
+  echo "[SUPERVISOR] Starting Phone Server daemon..."
+  node apps/server/dist/index.js
+  EXIT_STATUS=$?
+  echo "[SUPERVISOR] Server exited with code $EXIT_STATUS. Restarting in 2 seconds..."
+  sleep 2
+done

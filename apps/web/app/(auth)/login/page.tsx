@@ -96,7 +96,7 @@ export default function LoginPage() {
         <div className="mb-6 flex items-center justify-between border-b border-border pb-3 font-mono text-xs">
           <div className="flex items-center space-x-2">
             <span className="h-2 w-2 rounded-full bg-accent-blue" />
-            <span className="font-semibold text-fg">OPPO_SERVER_AUTH</span>
+            <span className="font-semibold text-fg">PHONE_SERVER_AUTH</span>
           </div>
           <span className="text-[11px] text-fg-subtle">
             {hasAdmin ? 'ACCESS_CONTROL' : 'INITIAL_SETUP'}

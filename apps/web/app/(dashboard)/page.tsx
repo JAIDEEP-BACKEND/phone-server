@@ -14,6 +14,10 @@ import {
   Terminal,
   Smartphone,
   ArrowUpRight,
+  Thermometer,
+  ShieldCheck,
+  Zap,
+  Radio,
 } from 'lucide-react';
 import { SystemVitals, AuditLogEntry, SOCKET_EVENTS } from '@android-server/shared';
 import { getSocket } from '@/lib/socket';
@@ -45,7 +49,7 @@ export default function DashboardPage() {
   useEffect(() => {
     let isMounted = true;
 
-    // Fetch initial vitals & recent logs
+    // Initial fetch
     Promise.all([
       fetchApi('/api/system/stats').catch(() => null),
       fetchApi('/api/logs?limit=10').catch(() => ({ logs: [] })),
@@ -81,219 +85,304 @@ export default function DashboardPage() {
   }, []);
 
   const cpuPercent = vitals?.cpu.usagePercent ?? 0;
-  const memUsedGb = vitals ? (vitals.memory.usedBytes / (1024 ** 3)).toFixed(1) : '0';
-  const memTotalGb = vitals ? (vitals.memory.totalBytes / (1024 ** 3)).toFixed(1) : '0';
-  const storageUsedGb = vitals ? (vitals.storage.usedBytes / (1024 ** 3)).toFixed(1) : '0';
-  const storageTotalGb = vitals ? (vitals.storage.totalBytes / (1024 ** 3)).toFixed(1) : '128';
+  const memUsedGb = vitals ? (vitals.memory.usedBytes / 1024 ** 3).toFixed(1) : '0';
+  const memTotalGb = vitals ? (vitals.memory.totalBytes / 1024 ** 3).toFixed(1) : '0';
+  const storageUsedGb = vitals ? (vitals.storage.usedBytes / 1024 ** 3).toFixed(1) : '0';
+  const storageTotalGb = vitals ? (vitals.storage.totalBytes / 1024 ** 3).toFixed(1) : '128';
+  const cpuTemp = vitals?.thermal?.cpuTempCelsius ?? 34.5;
 
   return (
     <div className="space-y-6">
-      {/* Top Telemetry Grid */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        {/* CPU */}
-        <div className="rounded border border-border bg-bg-panel p-3">
-          <div className="flex items-center justify-between text-fg-subtle">
-            <span className="font-mono text-[10px] uppercase">CPU LOAD</span>
-            <Cpu className="h-3.5 w-3.5 text-accent-blue" />
+      {/* Live Status Hero Banner */}
+      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-accent-blue/15 via-purple-500/10 to-transparent p-6 backdrop-blur-xl shadow-2xl">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center space-x-2">
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500" />
+              </span>
+              <h1 className="font-mono text-sm font-bold uppercase tracking-wider text-fg">
+                PHONE NAS PERSONAL SERVER
+              </h1>
+              <span className="rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-emerald-400">
+                1Hz TELEMETRY LIVE
+              </span>
+            </div>
+            <p className="font-mono text-xs text-fg-muted">
+              Self-hosted private storage, interactive terminal, and real-time hardware telemetry.
+            </p>
           </div>
-          <div className="mt-2 font-mono text-xl font-semibold text-fg">
+
+          <div className="flex items-center space-x-2 font-mono text-xs text-fg-muted bg-black/40 border border-white/10 rounded-xl px-3 py-2 shrink-0">
+            <Radio className="h-3.5 w-3.5 text-accent-blue animate-pulse" />
+            <span>Hotspot IP:</span>
+            <span className="text-accent-blue font-bold">192.168.43.1:3001</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Primary Telemetry Grid */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        {/* CPU Load */}
+        <div className="rounded-xl border border-white/10 bg-bg-panel/90 p-4 backdrop-blur-md shadow-lg transition-all hover:border-white/20">
+          <div className="flex items-center justify-between text-fg-subtle">
+            <span className="font-mono text-[10px] uppercase font-semibold">CPU LOAD</span>
+            <Cpu className="h-4 w-4 text-accent-blue" />
+          </div>
+          <div className="mt-2.5 font-mono text-2xl font-bold text-fg">
             {cpuPercent}%
           </div>
-          <div className="mt-1 h-1 w-full rounded bg-bg-base overflow-hidden">
+          <div className="mt-2 h-1.5 w-full rounded-full bg-white/5 overflow-hidden">
             <div
-              className={`h-full ${cpuPercent > 80 ? 'bg-accent-red' : 'bg-accent-blue'}`}
-              style={{ width: `${Math.min(100, cpuPercent)}%` }}
+              className={`h-full transition-all duration-500 ${
+                cpuPercent > 75
+                  ? 'bg-rose-500'
+                  : cpuPercent > 45
+                  ? 'bg-amber-400'
+                  : 'bg-emerald-400'
+              }`}
+              style={{ width: `${Math.max(4, Math.min(100, cpuPercent))}%` }}
             />
+          </div>
+          <div className="mt-1.5 font-mono text-[10px] text-fg-subtle">
+            {vitals?.cpu?.cores || 8} Active Cores
           </div>
         </div>
 
         {/* Memory */}
-        <div className="rounded border border-border bg-bg-panel p-3">
+        <div className="rounded-xl border border-white/10 bg-bg-panel/90 p-4 backdrop-blur-md shadow-lg transition-all hover:border-white/20">
           <div className="flex items-center justify-between text-fg-subtle">
-            <span className="font-mono text-[10px] uppercase">MEMORY</span>
-            <Activity className="h-3.5 w-3.5 text-accent-green" />
+            <span className="font-mono text-[10px] uppercase font-semibold">RAM MEMORY</span>
+            <Activity className="h-4 w-4 text-emerald-400" />
           </div>
-          <div className="mt-2 font-mono text-xl font-semibold text-fg truncate">
-            {memUsedGb} <span className="text-xs text-fg-muted">/ {memTotalGb} GB</span>
+          <div className="mt-2.5 font-mono text-2xl font-bold text-fg truncate">
+            {memUsedGb} <span className="text-xs font-normal text-fg-muted">/ {memTotalGb} GB</span>
           </div>
-          <div className="mt-1 h-1 w-full rounded bg-bg-base overflow-hidden">
+          <div className="mt-2 h-1.5 w-full rounded-full bg-white/5 overflow-hidden">
             <div
-              className="h-full bg-accent-green"
-              style={{ width: `${vitals?.memory.usagePercent || 0}%` }}
+              className="h-full bg-gradient-to-r from-emerald-500 to-cyan-400 transition-all duration-500"
+              style={{ width: `${vitals?.memory?.usagePercent || 0}%` }}
             />
+          </div>
+          <div className="mt-1.5 font-mono text-[10px] text-fg-subtle">
+            {vitals?.memory?.usagePercent || 0}% In Use
           </div>
         </div>
 
         {/* Storage */}
-        <div className="rounded border border-border bg-bg-panel p-3">
+        <div className="rounded-xl border border-white/10 bg-bg-panel/90 p-4 backdrop-blur-md shadow-lg transition-all hover:border-white/20">
           <div className="flex items-center justify-between text-fg-subtle">
-            <span className="font-mono text-[10px] uppercase">STORAGE</span>
-            <HardDrive className="h-3.5 w-3.5 text-accent-blue" />
+            <span className="font-mono text-[10px] uppercase font-semibold">STORAGE</span>
+            <HardDrive className="h-4 w-4 text-accent-blue" />
           </div>
-          <div className="mt-2 font-mono text-xl font-semibold text-fg truncate">
-            {storageUsedGb} <span className="text-xs text-fg-muted">/ {storageTotalGb} GB</span>
+          <div className="mt-2.5 font-mono text-2xl font-bold text-fg truncate">
+            {storageUsedGb} <span className="text-xs font-normal text-fg-muted">/ {storageTotalGb} GB</span>
           </div>
-          <div className="mt-1 h-1 w-full rounded bg-bg-base overflow-hidden">
+          <div className="mt-2 h-1.5 w-full rounded-full bg-white/5 overflow-hidden">
             <div
-              className="h-full bg-accent-blue"
-              style={{ width: `${vitals?.storage.usedPercentage || 0}%` }}
+              className="h-full bg-accent-blue transition-all duration-500"
+              style={{ width: `${vitals?.storage?.usedPercentage || 0}%` }}
             />
+          </div>
+          <div className="mt-1.5 font-mono text-[10px] text-fg-subtle">
+            {vitals?.storage?.usedPercentage || 0}% Allocated
+          </div>
+        </div>
+
+        {/* Temperature */}
+        <div className="rounded-xl border border-white/10 bg-bg-panel/90 p-4 backdrop-blur-md shadow-lg transition-all hover:border-white/20">
+          <div className="flex items-center justify-between text-fg-subtle">
+            <span className="font-mono text-[10px] uppercase font-semibold">THERMAL</span>
+            <Thermometer className="h-4 w-4 text-amber-400" />
+          </div>
+          <div className="mt-2.5 font-mono text-2xl font-bold text-fg">
+            {cpuTemp}°C
+          </div>
+          <div className="mt-2 flex items-center space-x-1 font-mono text-[10px]">
+            <span
+              className={`h-2 w-2 rounded-full ${
+                cpuTemp > 45 ? 'bg-rose-500' : cpuTemp > 38 ? 'bg-amber-400' : 'bg-emerald-400'
+              }`}
+            />
+            <span className="text-fg-subtle">
+              {cpuTemp > 45 ? 'High Load' : cpuTemp > 38 ? 'Moderate' : 'Optimal'}
+            </span>
+          </div>
+          <div className="mt-1.5 font-mono text-[10px] text-fg-subtle">
+            Hardware Sensor
           </div>
         </div>
 
         {/* Battery */}
-        <div className="rounded border border-border bg-bg-panel p-3">
+        <div className="rounded-xl border border-white/10 bg-bg-panel/90 p-4 backdrop-blur-md shadow-lg transition-all hover:border-white/20">
           <div className="flex items-center justify-between text-fg-subtle">
-            <span className="font-mono text-[10px] uppercase">BATTERY</span>
-            <Battery className="h-3.5 w-3.5 text-accent-green" />
+            <span className="font-mono text-[10px] uppercase font-semibold">BATTERY</span>
+            <Battery className="h-4 w-4 text-emerald-400" />
           </div>
-          <div className="mt-2 font-mono text-xl font-semibold text-fg">
-            {vitals?.battery.level ?? 100}%
+          <div className="mt-2.5 font-mono text-2xl font-bold text-fg">
+            {vitals?.battery?.level ?? 100}%
           </div>
-          <div className="mt-1 font-mono text-[10px] text-fg-muted truncate">
-            {vitals?.battery.isCharging ? 'CHARGING' : vitals?.battery.status || 'DISCHARGING'}
+          <div className="mt-2 flex items-center space-x-1 font-mono text-[10px] text-fg-muted">
+            <Zap className="h-3 w-3 text-amber-400" />
+            <span className="truncate">
+              {vitals?.battery?.isCharging ? 'Charging' : vitals?.battery?.status || 'Active'}
+            </span>
+          </div>
+          <div className="mt-1.5 font-mono text-[10px] text-fg-subtle">
+            Wake Lock On
           </div>
         </div>
 
-        {/* Network */}
-        <div className="rounded border border-border bg-bg-panel p-3">
+        {/* Network & Uptime */}
+        <div className="rounded-xl border border-white/10 bg-bg-panel/90 p-4 backdrop-blur-md shadow-lg transition-all hover:border-white/20">
           <div className="flex items-center justify-between text-fg-subtle">
-            <span className="font-mono text-[10px] uppercase">NETWORK</span>
-            <Wifi className="h-3.5 w-3.5 text-accent-blue" />
+            <span className="font-mono text-[10px] uppercase font-semibold">UPTIME</span>
+            <Clock className="h-4 w-4 text-accent-blue" />
           </div>
-          <div className="mt-2 font-mono text-xs text-fg">
-            ↓ {formatBytes(vitals?.network.rxBytesPerSec || 0)}/s
-          </div>
-          <div className="font-mono text-xs text-fg-muted">
-            ↑ {formatBytes(vitals?.network.txBytesPerSec || 0)}/s
-          </div>
-        </div>
-
-        {/* Uptime */}
-        <div className="rounded border border-border bg-bg-panel p-3">
-          <div className="flex items-center justify-between text-fg-subtle">
-            <span className="font-mono text-[10px] uppercase">UPTIME</span>
-            <Clock className="h-3.5 w-3.5 text-fg-muted" />
-          </div>
-          <div className="mt-2 font-mono text-xl font-semibold text-fg truncate">
+          <div className="mt-2.5 font-mono text-xl font-bold text-fg truncate">
             {vitals ? formatUptime(vitals.uptimeSeconds) : '0m'}
           </div>
-          <div className="mt-1 flex items-center space-x-1 font-mono text-[10px] text-accent-green">
-            <CheckCircle2 className="h-2.5 w-2.5" />
-            <span>ONLINE</span>
+          <div className="mt-2 font-mono text-[11px] text-fg-muted">
+            ↓ {formatBytes(vitals?.network?.rxBytesPerSec || 0)}/s
+          </div>
+          <div className="font-mono text-[10px] text-fg-subtle">
+            ↑ {formatBytes(vitals?.network?.txBytesPerSec || 0)}/s
           </div>
         </div>
       </div>
 
       {/* Quick Launch Cards */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Link
           href="/files"
-          className="group flex items-center justify-between rounded border border-border bg-bg-panel p-4 hover:border-accent-blue transition-colors"
+          className="group flex items-center justify-between rounded-xl border border-white/10 bg-bg-panel/90 p-5 backdrop-blur-md shadow-md hover:border-accent-blue hover:bg-accent-blue/5 transition-all"
         >
-          <div className="flex items-center space-x-3">
-            <div className="rounded border border-border bg-bg-base p-2 text-accent-blue">
-              <Folder className="h-5 w-5" />
+          <div className="flex items-center space-x-4">
+            <div className="rounded-xl border border-accent-blue/30 bg-accent-blue/15 p-3 text-accent-blue group-hover:scale-105 transition-transform">
+              <Folder className="h-6 w-6" />
             </div>
             <div>
-              <div className="font-mono text-xs font-semibold text-fg group-hover:text-accent-blue">
-                STORAGE & NAS
+              <div className="font-mono text-xs font-bold text-fg group-hover:text-accent-blue">
+                FILES & STORAGE NAS
               </div>
-              <div className="font-mono text-[11px] text-fg-muted">
-                Browse /storage/emulated/0
+              <div className="font-mono text-[11px] text-fg-subtle">
+                Browse, upload, download, and manage storage
               </div>
             </div>
           </div>
-          <ArrowUpRight className="h-4 w-4 text-fg-subtle group-hover:text-accent-blue" />
+          <ArrowUpRight className="h-4 w-4 text-fg-subtle group-hover:text-accent-blue transition-colors" />
         </Link>
 
         <Link
           href="/terminal"
-          className="group flex items-center justify-between rounded border border-border bg-bg-panel p-4 hover:border-accent-blue transition-colors"
+          className="group flex items-center justify-between rounded-xl border border-white/10 bg-bg-panel/90 p-5 backdrop-blur-md shadow-md hover:border-emerald-500 hover:bg-emerald-500/5 transition-all"
         >
-          <div className="flex items-center space-x-3">
-            <div className="rounded border border-border bg-bg-base p-2 text-accent-green">
-              <Terminal className="h-5 w-5" />
+          <div className="flex items-center space-x-4">
+            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/15 p-3 text-emerald-400 group-hover:scale-105 transition-transform">
+              <Terminal className="h-6 w-6" />
             </div>
             <div>
-              <div className="font-mono text-xs font-semibold text-fg group-hover:text-accent-green">
-                TERMUX SHELL
+              <div className="font-mono text-xs font-bold text-fg group-hover:text-emerald-400">
+                WEB TERMINAL
               </div>
-              <div className="font-mono text-[11px] text-fg-muted">
-                Interactive PTY console
+              <div className="font-mono text-[11px] text-fg-subtle">
+                Interactive Termux shell & command line
               </div>
             </div>
           </div>
-          <ArrowUpRight className="h-4 w-4 text-fg-subtle group-hover:text-accent-green" />
+          <ArrowUpRight className="h-4 w-4 text-fg-subtle group-hover:text-emerald-400 transition-colors" />
+        </Link>
+
+        <Link
+          href="/system"
+          className="group flex items-center justify-between rounded-xl border border-white/10 bg-bg-panel/90 p-5 backdrop-blur-md shadow-md hover:border-purple-500 hover:bg-purple-500/5 transition-all sm:col-span-2 lg:col-span-1"
+        >
+          <div className="flex items-center space-x-4">
+            <div className="rounded-xl border border-purple-500/30 bg-purple-500/15 p-3 text-purple-400 group-hover:scale-105 transition-transform">
+              <Smartphone className="h-6 w-6" />
+            </div>
+            <div>
+              <div className="font-mono text-xs font-bold text-fg group-hover:text-purple-400">
+                HARDWARE & ENVIRONMENT
+              </div>
+              <div className="font-mono text-[11px] text-fg-subtle">
+                Battery health, memory breakdown & sensors
+              </div>
+            </div>
+          </div>
+          <ArrowUpRight className="h-4 w-4 text-fg-subtle group-hover:text-purple-400 transition-colors" />
         </Link>
       </div>
 
-      {/* Recent Activity Section */}
-      <div className="rounded border border-border bg-bg-panel">
-        <div className="flex items-center justify-between border-b border-border px-4 py-3">
+      {/* Live System Activity Feed */}
+      <div className="rounded-xl border border-white/10 bg-bg-panel/90 backdrop-blur-md p-5 shadow-xl space-y-4">
+        <div className="flex items-center justify-between border-b border-white/10 pb-3">
           <div className="flex items-center space-x-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent-green" />
-            <span className="font-mono text-xs font-semibold uppercase tracking-wider text-fg">
-              Real-Time Activity Stream
-            </span>
+            <Activity className="h-4 w-4 text-accent-blue" />
+            <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-fg">
+              LIVE SYSTEM ACTIVITY LOGS
+            </h2>
           </div>
           <Link
             href="/activity"
-            className="font-mono text-xs text-accent-blue hover:underline"
+            className="font-mono text-xs text-accent-blue hover:underline flex items-center space-x-1"
           >
-            VIEW ALL LOGS →
+            <span>View All</span>
+            <ArrowUpRight className="h-3 w-3" />
           </Link>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full tech-table">
-            <thead>
-              <tr>
-                <th>TIME</th>
-                <th>USER</th>
-                <th>ACTION</th>
-                <th>TARGET</th>
-                <th>STATUS</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentLogs.length === 0 ? (
+        {recentLogs.length === 0 ? (
+          <div className="py-8 text-center font-mono text-xs text-fg-subtle">
+            Listening for system operations and security events...
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full tech-table font-mono text-xs">
+              <thead>
                 <tr>
-                  <td colSpan={5} className="py-6 text-center font-mono text-xs text-fg-subtle">
-                    No recent activity recorded.
-                  </td>
+                  <th>Timestamp</th>
+                  <th>Action</th>
+                  <th>Target</th>
+                  <th>User</th>
+                  <th>Status</th>
                 </tr>
-              ) : (
-                recentLogs.map((log) => {
-                  const isSuccess = log.status === 'SUCCESS';
-                  return (
-                    <tr key={log.id}>
-                      <td className="font-mono text-xs text-fg-muted whitespace-nowrap">
-                        {new Date(log.timestamp).toLocaleTimeString()}
-                      </td>
-                      <td className="font-mono text-xs text-fg">{log.username}</td>
-                      <td className="font-mono text-xs text-accent-blue">{log.action}</td>
-                      <td className="font-mono text-xs text-fg-muted truncate max-w-xs" title={log.target}>
-                        {log.target}
-                      </td>
-                      <td>
-                        <span
-                          className={`font-mono text-[11px] px-1.5 py-0.5 rounded ${
-                            isSuccess
-                              ? 'text-accent-green bg-accent-green-subtle'
-                              : 'text-accent-red bg-accent-red-subtle'
-                          }`}
-                        >
-                          {log.status}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {recentLogs.map((log) => (
+                  <tr key={log.id} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="text-fg-subtle text-[11px]">
+                      {new Date(log.timestamp).toLocaleTimeString()}
+                    </td>
+                    <td className="font-semibold text-fg">
+                      <span className="rounded bg-white/5 px-1.5 py-0.5 text-[10px] text-accent-blue border border-white/10">
+                        {log.action}
+                      </span>
+                    </td>
+                    <td className="text-fg-muted truncate max-w-[200px]">
+                      {log.target}
+                    </td>
+                    <td className="text-fg-muted">
+                      {log.username}
+                    </td>
+                    <td>
+                      <span
+                        className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
+                          log.status === 'SUCCESS'
+                            ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                            : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
+                        }`}
+                      >
+                        {log.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

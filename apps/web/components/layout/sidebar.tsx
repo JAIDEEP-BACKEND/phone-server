@@ -68,15 +68,23 @@ export function Sidebar({ user, isOpen, onClose }: SidebarProps) {
         }`}
       >
         {/* Brand / Header */}
-        <div className="flex h-14 items-center justify-between border-b border-border px-4">
-          <div className="flex items-center space-x-2">
-            <div className="h-2 w-2 rounded-full bg-accent-green animate-pulse" />
-            <span className="font-mono text-xs tracking-wider text-fg font-bold">
-              OPPO // NAS_CONSOLE
-            </span>
+        <div className="flex h-16 items-center justify-between border-b border-border/80 px-4 bg-bg-base/40 backdrop-blur-md">
+          <div className="flex items-center space-x-2.5">
+            <div className="relative flex h-2.5 w-2.5 items-center justify-center">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-green opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-accent-green" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-mono text-xs font-bold tracking-wider text-fg">
+                PHONE NAS
+              </span>
+              <span className="font-mono text-[9px] text-fg-subtle">
+                ARM64 PERSONAL SERVER
+              </span>
+            </div>
           </div>
-          <span className="rounded bg-bg-base px-1.5 py-0.5 font-mono text-[10px] text-fg-muted border border-border">
-            ARM64
+          <span className="rounded-full bg-accent-green/10 border border-accent-green/30 px-2 py-0.5 font-mono text-[10px] font-medium text-accent-green">
+            LIVE
           </span>
         </div>
 

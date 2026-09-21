@@ -20,12 +20,12 @@ export function Header({ onToggleMobileMenu, hostInfo }: HeaderProps) {
         </button>
 
         <div className="flex items-center space-x-2">
-          <span className="font-mono text-xs text-fg-muted">DEVICE:</span>
+          <span className="font-mono text-xs text-fg-muted">HOST:</span>
           <span className="font-mono text-xs text-fg font-semibold">
-            {hostInfo?.model || 'OPPO_CPH2219'}
+            {hostInfo?.model || 'Android Phone'}
           </span>
-          <span className="hidden sm:inline font-mono text-xs text-accent-blue font-semibold">
-            ({hostInfo?.ipAddress || '192.168.43.1'})
+          <span className="hidden sm:inline font-mono text-xs text-accent-blue font-medium bg-accent-blue/10 px-1.5 py-0.5 rounded border border-accent-blue/20">
+            {hostInfo?.ipAddress || '192.168.43.1'}
           </span>
         </div>
       </div>

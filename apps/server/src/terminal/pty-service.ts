@@ -76,16 +76,28 @@ export class PtyService {
 
       isPty = true;
     } catch {
-      // Robust child_process fallback
-      const child = spawn(shell, [], {
+      // Robust child_process interactive fallback
+      const env = {
+        ...process.env,
+        PATH: `/data/data/com.termux/files/usr/bin:/data/data/com.termux/files/usr/bin/applets:${process.env.PATH || '/system/bin'}`,
+        TERM: 'xterm-256color',
+        COLORTERM: 'truecolor',
+        PS1: '\\[\\033[01;32m\\]termux@phone\\[\\033[00m\\]:\\[\\033[01;34m\\]\\w\\[\\033[00m\\]$ ',
+      };
+
+      const shellArgs = shell.includes('bash') || shell.includes('sh') ? ['-i'] : [];
+      const child = spawn(shell, shellArgs, {
         cwd: process.env.HOME || process.cwd(),
-        env: {
-          ...process.env,
-          TERM: 'xterm-256color',
-        },
+        env,
         stdio: ['pipe', 'pipe', 'pipe'],
         shell: false,
       });
+
+      // Initial interactive prompt banner
+      socket.emit(
+        SOCKET_EVENTS.TERMINAL_DATA,
+        '\r\n\x1b[1;36m=== PHONE NAS SHELL (TERMUX) ===\x1b[0m\r\n\x1b[90mReady. Try commands: ls, df -h, free -m, top, ip a, termux-battery-status\x1b[0m\r\n\r\n'
+      );
 
       child.stdout?.on('data', (chunk: Buffer) => {
         socket.emit(SOCKET_EVENTS.TERMINAL_DATA, chunk.toString('utf-8'));
@@ -102,6 +114,13 @@ export class PtyService {
 
       ptyProcess = child;
       isPty = false;
+
+      // Send a newline to trigger the initial bash prompt
+      setTimeout(() => {
+        if (child.stdin && !child.stdin.destroyed) {
+          child.stdin.write('\n');
+        }
+      }, 200);
     }
 
     const session: TerminalSession = {
@@ -123,7 +142,7 @@ export class PtyService {
       target: shell,
       status: 'SUCCESS',
       ipAddress: socket.handshake.address,
-      details: { ptyMode: isPty ? 'native-pty' : 'pipe-fallback' },
+      details: { ptyMode: isPty ? 'native-pty' : 'pipe-interactive' },
     });
 
     return session;
@@ -136,7 +155,17 @@ export class PtyService {
     if (session.isPty) {
       session.process.write(data);
     } else if (session.process.stdin && !session.process.stdin.destroyed) {
-      session.process.stdin.write(data);
+      // In pipe mode, convert CR (\r) from xterm into LF (\n) for Linux bash
+      if (data === '\r' || data === '\r\n') {
+        session.process.stdin.write('\n');
+      } else if (data === '\x03') {
+        // Ctrl+C
+        try {
+          session.process.kill('SIGINT');
+        } catch {}
+      } else {
+        session.process.stdin.write(data);
+      }
     }
   }
 

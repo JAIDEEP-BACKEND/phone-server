@@ -97,3 +97,19 @@ export function setupSocketIO(io: SocketIOServer) {
     }
   }, 1000);
 }
+
+let activeSocketIO: SocketIOServer | null = null;
+
+export function setActiveSocketIO(io: SocketIOServer) {
+  activeSocketIO = io;
+}
+
+export function broadcastFileEvent(event: { path: string; action: string }) {
+  if (activeSocketIO) {
+    activeSocketIO.emit('files:changed', {
+      ...event,
+      timestamp: Date.now(),
+    });
+  }
+}
+

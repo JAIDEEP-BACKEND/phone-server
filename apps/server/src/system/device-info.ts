@@ -5,8 +5,8 @@ import { DeviceInfo } from '@android-server/shared';
 
 export class DeviceInfoService {
   static getDeviceInfo(): DeviceInfo {
-    let manufacturer = 'OPPO';
-    let model = 'CPH2219 (OPPO)';
+    let manufacturer = 'Android';
+    let model = 'Phone Host';
     let androidVersion = '14';
     let sdkInt = 34;
 

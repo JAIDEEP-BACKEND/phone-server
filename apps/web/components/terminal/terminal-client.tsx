@@ -127,26 +127,42 @@ export default function TerminalClient() {
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-1.5">
             <TermIcon className="h-4 w-4 text-accent-green" />
-            <span className="font-semibold text-fg">TERMUX_PTY_SHELL</span>
+            <span className="font-semibold text-fg">PHONE_SHELL_CONSOLE</span>
           </div>
 
-          <div className="flex items-center space-x-1 rounded bg-bg-base px-2 py-0.5 border border-border">
+          <div className="flex items-center space-x-1.5 rounded-full bg-black/40 px-2.5 py-0.5 border border-white/10">
             <div
               className={`h-2 w-2 rounded-full ${
-                connected ? 'bg-accent-green animate-pulse' : 'bg-accent-red'
+                connected ? 'bg-emerald-400 animate-pulse' : 'bg-rose-500'
               }`}
             />
-            <span className={connected ? 'text-accent-green' : 'text-accent-red'}>
-              {connected ? 'CONNECTED' : 'DISCONNECTED'}
+            <span className={`text-[10px] font-semibold ${connected ? 'text-emerald-400' : 'text-rose-500'}`}>
+              {connected ? 'ACTIVE' : 'DISCONNECTED'}
             </span>
           </div>
         </div>
 
         <div className="flex items-center space-x-2">
+          {/* Quick command buttons */}
+          <div className="hidden md:flex items-center space-x-1">
+            {['ls -la', 'df -h', 'free -m', 'ip a', 'uptime'].map((cmd) => (
+              <button
+                key={cmd}
+                onClick={() => {
+                  const socket = getSocket();
+                  socket.emit(SOCKET_EVENTS.TERMINAL_INPUT, `${cmd}\n`);
+                }}
+                className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 font-mono text-[10px] text-fg-muted hover:bg-white/10 hover:text-accent-blue transition-colors"
+              >
+                {cmd}
+              </button>
+            ))}
+          </div>
+
           <button
             onClick={handleClear}
             title="Clear terminal buffer"
-            className="flex items-center space-x-1 rounded border border-border bg-bg-base px-2 py-1 text-fg-muted hover:bg-bg-hover hover:text-fg transition-colors"
+            className="flex items-center space-x-1 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-fg-muted hover:bg-white/10 hover:text-fg transition-colors"
           >
             <Trash2 className="h-3 w-3" />
             <span className="hidden sm:inline">Clear</span>
@@ -156,7 +172,7 @@ export default function TerminalClient() {
             <button
               onClick={handleReconnect}
               title="Reconnect"
-              className="flex items-center space-x-1 rounded border border-accent-blue/50 bg-accent-blue-subtle px-2 py-1 text-accent-blue hover:bg-accent-blue hover:text-white transition-colors"
+              className="flex items-center space-x-1 rounded-lg border border-accent-blue/50 bg-accent-blue/20 px-2.5 py-1 text-accent-blue hover:bg-accent-blue hover:text-white transition-colors"
             >
               <RefreshCw className="h-3 w-3" />
               <span>Reconnect</span>
@@ -166,7 +182,7 @@ export default function TerminalClient() {
       </div>
 
       {/* Terminal Canvas Container */}
-      <div className="flex-1 bg-bg-base p-2 overflow-hidden">
+      <div className="flex-1 bg-[#080808] p-3 overflow-hidden">
         <div ref={terminalRef} className="h-full w-full" />
       </div>
     </div>

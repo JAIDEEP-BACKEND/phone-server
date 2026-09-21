@@ -4,10 +4,11 @@ import fs from 'fs';
 import path from 'path';
 import { requirePermission } from '../security/rbac-middleware';
 import { PERMISSIONS } from '@android-server/shared';
-import { FileService } from '../files/file-service';
 import { resolveSecurePath } from '../files/path-guard';
+import { FileService } from '../files/file-service';
 import { uploadMiddleware, finalizeUploads } from '../files/upload-middleware';
 import { logAudit } from '../audit/audit-service';
+import { broadcastFileEvent } from '../sockets/socket-handler';
 
 export const filesRouter = Router();
 
@@ -44,6 +45,7 @@ filesRouter.post('/create-folder', requirePermission(PERMISSIONS.FILES_WRITE), a
     });
 
     res.json({ message: 'Folder created.', item });
+    broadcastFileEvent({ path: item.path, action: 'create' });
   } catch (err: any) {
     res.status(400).json({ error: err.message });
   }
@@ -77,6 +79,7 @@ filesRouter.post(
       }
 
       res.json({ message: 'Files uploaded successfully.', files: uploaded });
+      broadcastFileEvent({ path: targetPath, action: 'upload' });
     } catch (err: any) {
       res.status(400).json({ error: err.message });
     }
@@ -133,6 +136,7 @@ filesRouter.delete('/delete', requirePermission(PERMISSIONS.FILES_DELETE), async
     });
 
     res.json({ message: 'Item deleted successfully.' });
+    broadcastFileEvent({ path: targetPath, action: 'delete' });
   } catch (err: any) {
     res.status(400).json({ error: err.message });
   }
@@ -159,6 +163,7 @@ filesRouter.post('/rename', requirePermission(PERMISSIONS.FILES_RENAME), async (
     });
 
     res.json({ message: 'Item renamed.', item: updated });
+    broadcastFileEvent({ path: updated.path, action: 'rename' });
   } catch (err: any) {
     res.status(400).json({ error: err.message });
   }
@@ -185,6 +190,7 @@ filesRouter.post('/move', requirePermission(PERMISSIONS.FILES_MOVE), async (req,
     });
 
     res.json({ message: 'Item moved successfully.' });
+    broadcastFileEvent({ path: destinationFolder, action: 'move' });
   } catch (err: any) {
     res.status(400).json({ error: err.message });
   }
@@ -206,6 +212,7 @@ filesRouter.post('/copy', requirePermission(PERMISSIONS.FILES_WRITE), async (req
     });
 
     res.json({ message: 'Item copied successfully.' });
+    broadcastFileEvent({ path: destinationFolder, action: 'copy' });
   } catch (err: any) {
     res.status(400).json({ error: err.message });
   }

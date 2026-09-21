@@ -39,6 +39,27 @@ async function bootstrap() {
     });
     (0, audit_service_1.setAuditSocketIO)(io);
     (0, socket_handler_1.setupSocketIO)(io);
+    const { setActiveSocketIO, broadcastFileEvent } = require('./sockets/socket-handler');
+    setActiveSocketIO(io);
+    // Storage filesystem live watcher for real-time instant syncing
+    try {
+        if (fs_1.default.existsSync(config_1.CONFIG.STORAGE_ROOT)) {
+            let watchDebounce = null;
+            fs_1.default.watch(config_1.CONFIG.STORAGE_ROOT, { recursive: true }, (event, filename) => {
+                if (!filename || filename.startsWith('.') || filename.includes('.nas_temp_uploads'))
+                    return;
+                if (watchDebounce)
+                    clearTimeout(watchDebounce);
+                watchDebounce = setTimeout(() => {
+                    broadcastFileEvent({ path: '/' + filename.replace(/\\/g, '/'), action: event });
+                }, 300);
+            });
+            console.log(`[WATCHER] Active real-time storage sync enabled on ${config_1.CONFIG.STORAGE_ROOT}`);
+        }
+    }
+    catch (err) {
+        console.log('[WATCHER] Native recursive watch not available, relying on event triggers.');
+    }
     // 3. Security & Middleware
     app.use((0, helmet_1.default)({
         contentSecurityPolicy: false,
@@ -88,7 +109,7 @@ async function bootstrap() {
     server.listen(config_1.CONFIG.PORT, config_1.CONFIG.HOST, () => {
         const deviceInfo = device_info_1.DeviceInfoService.getDeviceInfo();
         console.log('====================================================');
-        console.log('  OPPO ANDROID NAS & PERSONAL SERVER - ACTIVE');
+        console.log('  PHONE ANDROID NAS & PERSONAL SERVER - ACTIVE');
         console.log('====================================================');
         console.log(`  Local Address:     http://localhost:${config_1.CONFIG.PORT}`);
         console.log(`  LAN IP Address:    http://${deviceInfo.ipAddress}:${config_1.CONFIG.PORT}`);
@@ -102,6 +123,13 @@ async function bootstrap() {
         console.log('====================================================');
     });
 }
+// Global Crash Guard so unexpected network drops never crash the Termux server
+process.on('uncaughtException', (err) => {
+    console.error('[CRASH_GUARD] Uncaught Exception intercepted:', err);
+});
+process.on('unhandledRejection', (reason) => {
+    console.error('[CRASH_GUARD] Unhandled Rejection intercepted:', reason);
+});
 bootstrap().catch((err) => {
     console.error('[FATAL] Failed to start server:', err);
     process.exit(1);

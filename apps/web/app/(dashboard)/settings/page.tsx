@@ -10,7 +10,7 @@ export default function SettingsPage() {
     storageRoot: '/storage/emulated/0',
     maxUploadSizeMb: '2048',
     sessionTtlHours: '24',
-    deviceName: 'OPPO Android Server',
+    deviceName: 'Phone NAS Server',
     rateLimitAttempts: '5',
   });
   const [loading, setLoading] = useState(true);
@@ -170,7 +170,7 @@ export default function SettingsPage() {
         </p>
 
         <ol className="list-decimal list-inside space-y-1.5 text-fg-subtle">
-          <li><strong>Direct Phone Hotspot</strong>: Turn on Personal Hotspot on your OPPO phone, connect your PC or laptop Wi-Fi to the phone hotspot, and open <code>http://192.168.43.1:3001</code>.</li>
+          <li><strong>Direct Phone Hotspot</strong>: Turn on Personal Hotspot on your phone, connect your PC or laptop Wi-Fi to the phone hotspot, and open <code>http://192.168.43.1:3001</code>.</li>
           <li><strong>Shared Wi-Fi Network</strong>: Connect both your phone and PC to your home/office Wi-Fi, and open <code>http://&lt;PHONE_LAN_IP&gt;:3001</code>.</li>
           <li><strong>Local Access</strong>: On the phone itself, open <code>http://localhost:3001</code> in any mobile browser.</li>
         </ol>
