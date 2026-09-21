@@ -10,7 +10,8 @@
   "scripts": {
     "dev": "npm run dev --workspace=apps/server & npm run dev --workspace=apps/web",
     "build": "npm run build --workspaces --if-present",
-    "start": "npm run start --workspace=apps/server",
+    "prestart": "node -e \"if(!require('fs').existsSync('node_modules/express')&&!require('fs').existsSync('apps/server/node_modules/express')){console.log('[DEPENDENCIES] Installing missing packages in Termux...');require('child_process').execSync('npm install --omit=dev',{stdio:'inherit'})}\"",
+    "start": "bash scripts/start.sh 2>/dev/null || npm run start --workspace=apps/server",
     "setup": "bash scripts/setup-termux.sh"
   },
   "keywords": [
