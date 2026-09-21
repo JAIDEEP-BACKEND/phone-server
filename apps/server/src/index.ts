@@ -88,6 +88,7 @@ async function bootstrap() {
     console.log('====================================================');
     console.log(`  Local Address:     http://localhost:${CONFIG.PORT}`);
     console.log(`  LAN IP Address:    http://${deviceInfo.ipAddress}:${CONFIG.PORT}`);
+    console.log(`  Phone Hotspot AP:  http://192.168.43.1:${CONFIG.PORT} (Connect PC to phone's Wi-Fi Hotspot)`);
     console.log(`  Storage Root:      ${CONFIG.STORAGE_ROOT}`);
     console.log(`  Database File:     ${CONFIG.DATABASE_PATH}`);
     console.log(`  Architecture:      ${deviceInfo.architecture}`);

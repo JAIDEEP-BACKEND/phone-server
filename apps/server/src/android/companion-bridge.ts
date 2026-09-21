@@ -155,17 +155,26 @@ export class CompanionBridge {
     const totalRamBytes = os.totalmem();
     const totalStorageBytes = 128 * 1024 * 1024 * 1024; // 128 GB OPPO Phone internal storage
 
-    // Discover LAN IP
+    // Discover all LAN and Hotspot IPs
     let ipAddress = '127.0.0.1';
+    let hotspotIp: string | null = null;
     const networkInterfaces = os.networkInterfaces();
+
     for (const name of Object.keys(networkInterfaces)) {
       for (const net of networkInterfaces[name] || []) {
         if (!net.internal && net.family === 'IPv4') {
-          ipAddress = net.address;
-          break;
+          // Check if this is the Android hotspot AP subnet (typically 192.168.43.x)
+          if (net.address.startsWith('192.168.43.') || name.includes('ap') || name.includes('softap')) {
+            hotspotIp = net.address;
+          } else if (ipAddress === '127.0.0.1') {
+            ipAddress = net.address;
+          }
         }
       }
     }
+
+    // Prefer hotspot IP if active, otherwise standard LAN IP
+    const resolvedIp = hotspotIp || ipAddress;
 
     return {
       manufacturer,
@@ -178,7 +187,7 @@ export class CompanionBridge {
       totalStorageBytes,
       screenResolution: '1080 x 2400',
       refreshRateHz: 90,
-      ipAddress,
+      ipAddress: resolvedIp,
       hostname: os.hostname(),
       companionVersion: this.capabilities.companionConnected ? '1.0.0' : undefined,
     };
