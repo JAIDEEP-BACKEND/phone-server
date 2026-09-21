@@ -186,7 +186,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Launch Cards */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Link
           href="/files"
           className="group flex items-center justify-between rounded border border-border bg-bg-panel p-4 hover:border-accent-blue transition-colors"
@@ -225,26 +225,6 @@ export default function DashboardPage() {
             </div>
           </div>
           <ArrowUpRight className="h-4 w-4 text-fg-subtle group-hover:text-accent-green" />
-        </Link>
-
-        <Link
-          href="/remote"
-          className="group flex items-center justify-between rounded border border-border bg-bg-panel p-4 hover:border-accent-blue transition-colors"
-        >
-          <div className="flex items-center space-x-3">
-            <div className="rounded border border-border bg-bg-base p-2 text-accent-blue">
-              <Smartphone className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="font-mono text-xs font-semibold text-fg group-hover:text-accent-blue">
-                REMOTE CONTROL
-              </div>
-              <div className="font-mono text-[11px] text-fg-muted">
-                Screen & gesture stream
-              </div>
-            </div>
-          </div>
-          <ArrowUpRight className="h-4 w-4 text-fg-subtle group-hover:text-accent-blue" />
         </Link>
       </div>
 

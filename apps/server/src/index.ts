@@ -8,7 +8,7 @@ import { CONFIG } from './config';
 import { initDatabase } from './database/db';
 import { authMiddleware } from './security/rbac-middleware';
 import { setAuditSocketIO } from './audit/audit-service';
-import { CompanionBridge } from './android/companion-bridge';
+import { DeviceInfoService } from './system/device-info';
 import { setupSocketIO } from './sockets/socket-handler';
 
 // Routes
@@ -33,17 +33,15 @@ async function bootstrap() {
       origin: true,
       credentials: true,
     },
-    maxHttpBufferSize: 1e8, // 100MB for media/screen streaming
   });
 
   setAuditSocketIO(io);
-  CompanionBridge.init(io);
   setupSocketIO(io);
 
   // 3. Security & Middleware
   app.use(
     helmet({
-      contentSecurityPolicy: false, // Managed custom headers for terminal and websockets
+      contentSecurityPolicy: false,
       crossOriginEmbedderPolicy: false,
     })
   );
@@ -71,7 +69,7 @@ async function bootstrap() {
   app.use('/api/logs', logsRouter);
   app.use('/api/settings', settingsRouter);
 
-  // 5. Clean Error Handler (No stack traces to clients)
+  // 5. Clean Error Handler
   app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
     console.error(`[SERVER ERROR] ${req.method} ${req.url}:`, err);
     res.status(err.status || 500).json({
@@ -82,18 +80,18 @@ async function bootstrap() {
 
   // 6. Start Listener
   server.listen(CONFIG.PORT, CONFIG.HOST, () => {
-    const deviceInfo = CompanionBridge.getDeviceInfo();
+    const deviceInfo = DeviceInfoService.getDeviceInfo();
     console.log('====================================================');
-    console.log('  ANDROID NAS + REMOTE CONTROL SERVER - ACTIVE');
+    console.log('  OPPO ANDROID NAS & PERSONAL SERVER - ACTIVE');
     console.log('====================================================');
     console.log(`  Local Address:     http://localhost:${CONFIG.PORT}`);
     console.log(`  LAN IP Address:    http://${deviceInfo.ipAddress}:${CONFIG.PORT}`);
-    console.log(`  Phone Hotspot AP:  http://192.168.43.1:${CONFIG.PORT} (Connect PC to phone's Wi-Fi Hotspot)`);
+    console.log(`  Phone Hotspot AP:  http://192.168.43.1:${CONFIG.PORT} (Connect to phone's Wi-Fi hotspot)`);
     console.log(`  Storage Root:      ${CONFIG.STORAGE_ROOT}`);
     console.log(`  Database File:     ${CONFIG.DATABASE_PATH}`);
     console.log(`  Architecture:      ${deviceInfo.architecture}`);
     if (CONFIG.HOST === '0.0.0.0') {
-      console.log('  [NOTICE] Listening on 0.0.0.0 (Accessible to all devices on local network)');
+      console.log('  [NOTICE] Listening on 0.0.0.0 (Accessible to devices on hotspot or local network)');
     }
     console.log('====================================================');
   });

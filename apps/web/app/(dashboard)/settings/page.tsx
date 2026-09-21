@@ -158,24 +158,21 @@ export default function SettingsPage() {
         </div>
       </form>
 
-      {/* Android Companion Setup Guide */}
+      {/* Hotspot & LAN Network Guide */}
       <div className="rounded border border-border bg-bg-panel p-5 space-y-3 font-mono text-xs">
         <div className="flex items-center space-x-2 font-semibold text-fg">
-          <Smartphone className="h-4 w-4 text-accent-green" />
-          <span>Android Companion Setup Protocol</span>
+          <Wifi className="h-4 w-4 text-accent-green" />
+          <span>Hotspot & LAN Network Access Protocol</span>
         </div>
 
         <p className="text-fg-muted leading-relaxed">
-          The companion app enables MediaProjection screen streaming, Accessibility touch dispatching, and hardware key controls:
+          The server daemon runs entirely inside Termux on your phone and can be reached from any device on your local network:
         </p>
 
         <ol className="list-decimal list-inside space-y-1.5 text-fg-subtle">
-          <li>Install the companion APK from <code>apps/android/app/build/outputs/apk/debug/app-debug.apk</code>.</li>
-          <li>Launch the companion application on your phone.</li>
-          <li>Tap <strong>Grant Screen Capture</strong> and accept the system prompt.</li>
-          <li>Tap <strong>Enable Accessibility Service</strong> and toggle <em>OPPO Remote Control Service</em> to ON.</li>
-          <li>Tap <strong>Grant Storage Access</strong> to enable shared media traversal.</li>
-          <li>The status badge on the top header will switch to <span className="text-accent-green">COMPANION LINKED</span>.</li>
+          <li><strong>Direct Phone Hotspot</strong>: Turn on Personal Hotspot on your OPPO phone, connect your PC or laptop Wi-Fi to the phone hotspot, and open <code>http://192.168.43.1:3001</code>.</li>
+          <li><strong>Shared Wi-Fi Network</strong>: Connect both your phone and PC to your home/office Wi-Fi, and open <code>http://&lt;PHONE_LAN_IP&gt;:3001</code>.</li>
+          <li><strong>Local Access</strong>: On the phone itself, open <code>http://localhost:3001</code> in any mobile browser.</li>
         </ol>
       </div>
     </div>

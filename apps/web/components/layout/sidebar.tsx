@@ -41,7 +41,6 @@ export function Sidebar({ user, isOpen, onClose }: SidebarProps) {
     { label: 'FILES', href: '/files', icon: Folder },
     { label: 'TERMINAL', href: '/terminal', icon: TerminalIcon },
     { label: 'SYSTEM', href: '/system', icon: Cpu },
-    { label: 'REMOTE', href: '/remote', icon: Smartphone },
     { label: 'PHONE', href: '/phone', icon: Smartphone },
     { label: 'ACTIVITY', href: '/activity', icon: Activity },
   ];
