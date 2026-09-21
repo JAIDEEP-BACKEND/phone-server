@@ -8,6 +8,7 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const mime_types_1 = __importDefault(require("mime-types"));
 const path_guard_1 = require("./path-guard");
+const fs_utils_1 = require("./fs-utils");
 const config_1 = require("../config");
 class FileService {
     /**
@@ -130,7 +131,7 @@ class FileService {
         if (fs_1.default.existsSync(destinationAbs)) {
             throw new Error('An item with the new name already exists.');
         }
-        await fs_1.default.promises.rename(absolutePath, destinationAbs);
+        await (0, fs_utils_1.movePathSafely)(absolutePath, destinationAbs);
         const stat = await fs_1.default.promises.stat(destinationAbs);
         const isDir = stat.isDirectory();
         const newRelative = path_1.default.join(path_1.default.dirname(relativePath), cleanName).replace(/\\/g, '/');
@@ -163,7 +164,7 @@ class FileService {
         if (fs_1.default.existsSync(destAbs)) {
             throw new Error('An item with the same name already exists in destination.');
         }
-        await fs_1.default.promises.rename(srcAbs, destAbs);
+        await (0, fs_utils_1.movePathSafely)(srcAbs, destAbs);
     }
     /**
      * Copy an item to a destination folder

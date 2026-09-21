@@ -3,6 +3,7 @@ import path from 'path';
 import mime from 'mime-types';
 import { FileItem, StorageStats } from '@android-server/shared';
 import { resolveSecurePath, sanitizeFilename, PathTraversalError } from './path-guard';
+import { movePathSafely } from './fs-utils';
 import { CONFIG } from '../config';
 
 export class FileService {
@@ -148,7 +149,7 @@ export class FileService {
       throw new Error('An item with the new name already exists.');
     }
 
-    await fs.promises.rename(absolutePath, destinationAbs);
+    await movePathSafely(absolutePath, destinationAbs);
     const stat = await fs.promises.stat(destinationAbs);
     const isDir = stat.isDirectory();
     const newRelative = path.join(path.dirname(relativePath), cleanName).replace(/\\/g, '/');
@@ -188,7 +189,7 @@ export class FileService {
       throw new Error('An item with the same name already exists in destination.');
     }
 
-    await fs.promises.rename(srcAbs, destAbs);
+    await movePathSafely(srcAbs, destAbs);
   }
 
   /**

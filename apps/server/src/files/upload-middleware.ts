@@ -2,19 +2,32 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
-import { Request, Response, NextFunction } from 'express';
 import { CONFIG } from '../config';
 import { resolveSecurePath, sanitizeFilename } from './path-guard';
+import { movePathSafely } from './fs-utils';
 
-const tempUploadDir = path.join(os.tmpdir(), 'nas-uploads-temp');
-if (!fs.existsSync(tempUploadDir)) {
-  fs.mkdirSync(tempUploadDir, { recursive: true });
+function getUploadTempDir(): string {
+  // Prefer storing temporary uploads directly on the target storage disk
+  // so final placement is an instant same-device rename
+  const preferredDir = path.join(CONFIG.STORAGE_ROOT, '.nas_temp_uploads');
+  try {
+    if (!fs.existsSync(preferredDir)) {
+      fs.mkdirSync(preferredDir, { recursive: true });
+    }
+    return preferredDir;
+  } catch {
+    const osFallback = path.join(os.tmpdir(), 'nas-uploads-temp');
+    if (!fs.existsSync(osFallback)) {
+      fs.mkdirSync(osFallback, { recursive: true });
+    }
+    return osFallback;
+  }
 }
 
 // Multer temporary storage configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, tempUploadDir);
+    cb(null, getUploadTempDir());
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
@@ -26,7 +39,7 @@ export const uploadMiddleware = multer({
   storage,
   limits: {
     fileSize: CONFIG.MAX_UPLOAD_SIZE_MB * 1024 * 1024,
-    files: 20, // Max 20 files per bulk upload request
+    files: 50, // Max 50 files per bulk upload request
   },
 });
 
@@ -56,8 +69,8 @@ export async function finalizeUploads(
       counter++;
     }
 
-    // Move file from temp to final destination
-    await fs.promises.rename(file.path, finalTargetAbs);
+    // Move file safely across devices/filesystems
+    await movePathSafely(file.path, finalTargetAbs);
     const savedName = path.basename(finalTargetAbs);
 
     results.push({
@@ -70,3 +83,4 @@ export async function finalizeUploads(
 
   return results;
 }
+

@@ -11,14 +11,29 @@ const fs_1 = __importDefault(require("fs"));
 const os_1 = __importDefault(require("os"));
 const config_1 = require("../config");
 const path_guard_1 = require("./path-guard");
-const tempUploadDir = path_1.default.join(os_1.default.tmpdir(), 'nas-uploads-temp');
-if (!fs_1.default.existsSync(tempUploadDir)) {
-    fs_1.default.mkdirSync(tempUploadDir, { recursive: true });
+const fs_utils_1 = require("./fs-utils");
+function getUploadTempDir() {
+    // Prefer storing temporary uploads directly on the target storage disk
+    // so final placement is an instant same-device rename
+    const preferredDir = path_1.default.join(config_1.CONFIG.STORAGE_ROOT, '.nas_temp_uploads');
+    try {
+        if (!fs_1.default.existsSync(preferredDir)) {
+            fs_1.default.mkdirSync(preferredDir, { recursive: true });
+        }
+        return preferredDir;
+    }
+    catch {
+        const osFallback = path_1.default.join(os_1.default.tmpdir(), 'nas-uploads-temp');
+        if (!fs_1.default.existsSync(osFallback)) {
+            fs_1.default.mkdirSync(osFallback, { recursive: true });
+        }
+        return osFallback;
+    }
 }
 // Multer temporary storage configuration
 const storage = multer_1.default.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, tempUploadDir);
+        cb(null, getUploadTempDir());
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
@@ -29,7 +44,7 @@ exports.uploadMiddleware = (0, multer_1.default)({
     storage,
     limits: {
         fileSize: config_1.CONFIG.MAX_UPLOAD_SIZE_MB * 1024 * 1024,
-        files: 20, // Max 20 files per bulk upload request
+        files: 50, // Max 50 files per bulk upload request
     },
 });
 /**
@@ -50,8 +65,8 @@ async function finalizeUploads(files, targetRelativeDir) {
             finalTargetAbs = path_1.default.join(destFolderAbs, numberedName);
             counter++;
         }
-        // Move file from temp to final destination
-        await fs_1.default.promises.rename(file.path, finalTargetAbs);
+        // Move file safely across devices/filesystems
+        await (0, fs_utils_1.movePathSafely)(file.path, finalTargetAbs);
         const savedName = path_1.default.basename(finalTargetAbs);
         results.push({
             originalName: file.originalname,
