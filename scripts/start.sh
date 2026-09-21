@@ -11,5 +11,12 @@ if [ -f .env ]; then
   export $(cat .env | grep -v '#' | xargs)
 fi
 
-echo "[START] Starting Android NAS & Remote Control Server on port ${PORT:-3001}..."
+# Ensure server is built before launching
+if [ ! -f "apps/server/dist/index.js" ]; then
+  echo "[BUILD] Building server and shared packages..."
+  npm run build --workspace=@android-server/shared
+  npm run build --workspace=@android-server/server
+fi
+
+echo "[START] Starting OPPO Android NAS Server on port ${PORT:-3001}..."
 npm run start --workspace=@android-server/server

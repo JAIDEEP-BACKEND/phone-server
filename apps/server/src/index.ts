@@ -8,6 +8,8 @@ import { CONFIG } from './config';
 import { initDatabase } from './database/db';
 import { authMiddleware } from './security/rbac-middleware';
 import { setAuditSocketIO } from './audit/audit-service';
+import path from 'path';
+import fs from 'fs';
 import { DeviceInfoService } from './system/device-info';
 import { setupSocketIO } from './sockets/socket-handler';
 
@@ -69,7 +71,22 @@ async function bootstrap() {
   app.use('/api/logs', logsRouter);
   app.use('/api/settings', settingsRouter);
 
-  // 5. Clean Error Handler
+  // 5. Serve static Web Console frontend
+  const webOutDir = path.resolve(__dirname, '../../web/out');
+  if (fs.existsSync(webOutDir)) {
+    app.use(express.static(webOutDir));
+    app.get('*', (req, res, next) => {
+      if (req.path.startsWith('/api')) return next();
+      const cleanPath = req.path.replace(/\/$/, '');
+      const candidateHtml = path.join(webOutDir, cleanPath, 'index.html');
+      if (cleanPath && fs.existsSync(candidateHtml)) {
+        return res.sendFile(candidateHtml);
+      }
+      res.sendFile(path.join(webOutDir, 'index.html'));
+    });
+  }
+
+  // 6. Clean Error Handler
   app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
     console.error(`[SERVER ERROR] ${req.method} ${req.url}:`, err);
     res.status(err.status || 500).json({
