@@ -77,11 +77,15 @@ class PtyService {
             });
             // Initial interactive prompt banner
             socket.emit(shared_1.SOCKET_EVENTS.TERMINAL_DATA, '\r\n\x1b[1;36m=== PHONE NAS SHELL (TERMUX) ===\x1b[0m\r\n\x1b[90mReady. Try commands: ls, df -h, free -m, top, ip a, termux-battery-status\x1b[0m\r\n\r\n');
+            // Normalize newlines to \r\n so cursor always returns to column 0 (prevents staircase effect)
+            const formatOutput = (text) => {
+                return text.replace(/\r\n/g, '\n').replace(/\n/g, '\r\n');
+            };
             child.stdout?.on('data', (chunk) => {
-                socket.emit(shared_1.SOCKET_EVENTS.TERMINAL_DATA, chunk.toString('utf-8'));
+                socket.emit(shared_1.SOCKET_EVENTS.TERMINAL_DATA, formatOutput(chunk.toString('utf-8')));
             });
             child.stderr?.on('data', (chunk) => {
-                socket.emit(shared_1.SOCKET_EVENTS.TERMINAL_DATA, chunk.toString('utf-8'));
+                socket.emit(shared_1.SOCKET_EVENTS.TERMINAL_DATA, formatOutput(chunk.toString('utf-8')));
             });
             child.on('close', (code) => {
                 socket.emit(shared_1.SOCKET_EVENTS.TERMINAL_EXIT, { exitCode: code });

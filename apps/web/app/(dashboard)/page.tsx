@@ -123,17 +123,17 @@ export default function DashboardPage() {
       </div>
 
       {/* Primary Telemetry Grid */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-6">
         {/* CPU Load */}
-        <div className="rounded-xl border border-white/10 bg-bg-panel/90 p-4 backdrop-blur-md shadow-lg transition-all hover:border-white/20">
-          <div className="flex items-center justify-between text-fg-subtle">
-            <span className="font-mono text-[10px] uppercase font-semibold">CPU LOAD</span>
-            <Cpu className="h-4 w-4 text-accent-blue" />
+        <div className="hud-card rounded-xl p-4 transition-all hover:border-cyan-400/50">
+          <div className="flex items-center justify-between text-slate-400">
+            <span className="font-orbitron text-[10px] uppercase font-bold tracking-wider text-cyan-400">CPU LOAD</span>
+            <Cpu className="h-4 w-4 text-cyan-400" />
           </div>
-          <div className="mt-2.5 font-mono text-2xl font-bold text-fg">
+          <div className="mt-2.5 font-orbitron text-2xl font-black text-cyan-300 text-glow-cyan">
             {cpuPercent}%
           </div>
-          <div className="mt-2 h-1.5 w-full rounded-full bg-white/5 overflow-hidden">
+          <div className="mt-2 h-1.5 w-full rounded-full bg-slate-900 border border-cyan-500/20 overflow-hidden">
             <div
               className={`h-full transition-all duration-500 ${
                 cpuPercent > 75
@@ -145,58 +145,58 @@ export default function DashboardPage() {
               style={{ width: `${Math.max(4, Math.min(100, cpuPercent))}%` }}
             />
           </div>
-          <div className="mt-1.5 font-mono text-[10px] text-fg-subtle">
+          <div className="mt-1.5 font-mono text-[10px] text-slate-400">
             {vitals?.cpu?.cores || 8} Active Cores
           </div>
         </div>
 
         {/* Memory */}
-        <div className="rounded-xl border border-white/10 bg-bg-panel/90 p-4 backdrop-blur-md shadow-lg transition-all hover:border-white/20">
-          <div className="flex items-center justify-between text-fg-subtle">
-            <span className="font-mono text-[10px] uppercase font-semibold">RAM MEMORY</span>
+        <div className="hud-card-green rounded-xl p-4 transition-all hover:border-emerald-400/50">
+          <div className="flex items-center justify-between text-slate-400">
+            <span className="font-orbitron text-[10px] uppercase font-bold tracking-wider text-emerald-400">RAM MEMORY</span>
             <Activity className="h-4 w-4 text-emerald-400" />
           </div>
-          <div className="mt-2.5 font-mono text-2xl font-bold text-fg truncate">
-            {memUsedGb} <span className="text-xs font-normal text-fg-muted">/ {memTotalGb} GB</span>
+          <div className="mt-2.5 font-orbitron text-2xl font-black text-emerald-300 text-glow-green truncate">
+            {memUsedGb} <span className="text-xs font-normal text-slate-400">/ {memTotalGb} GB</span>
           </div>
-          <div className="mt-2 h-1.5 w-full rounded-full bg-white/5 overflow-hidden">
+          <div className="mt-2 h-1.5 w-full rounded-full bg-slate-900 border border-emerald-500/20 overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-emerald-500 to-cyan-400 transition-all duration-500"
               style={{ width: `${vitals?.memory?.usagePercent || 0}%` }}
             />
           </div>
-          <div className="mt-1.5 font-mono text-[10px] text-fg-subtle">
-            {vitals?.memory?.usagePercent || 0}% In Use
+          <div className="mt-1.5 font-mono text-[10px] text-slate-400">
+            {vitals?.memory?.usagePercent || 0}% Allocated
           </div>
         </div>
 
         {/* Storage */}
-        <div className="rounded-xl border border-white/10 bg-bg-panel/90 p-4 backdrop-blur-md shadow-lg transition-all hover:border-white/20">
-          <div className="flex items-center justify-between text-fg-subtle">
-            <span className="font-mono text-[10px] uppercase font-semibold">STORAGE</span>
-            <HardDrive className="h-4 w-4 text-accent-blue" />
+        <div className="hud-card rounded-xl p-4 transition-all hover:border-cyan-400/50">
+          <div className="flex items-center justify-between text-slate-400">
+            <span className="font-orbitron text-[10px] uppercase font-bold tracking-wider text-cyan-400">STORAGE</span>
+            <HardDrive className="h-4 w-4 text-cyan-400" />
           </div>
-          <div className="mt-2.5 font-mono text-2xl font-bold text-fg truncate">
-            {storageUsedGb} <span className="text-xs font-normal text-fg-muted">/ {storageTotalGb} GB</span>
+          <div className="mt-2.5 font-orbitron text-2xl font-black text-cyan-300 text-glow-cyan truncate">
+            {storageUsedGb} <span className="text-xs font-normal text-slate-400">/ {storageTotalGb} GB</span>
           </div>
-          <div className="mt-2 h-1.5 w-full rounded-full bg-white/5 overflow-hidden">
+          <div className="mt-2 h-1.5 w-full rounded-full bg-slate-900 border border-cyan-500/20 overflow-hidden">
             <div
-              className="h-full bg-accent-blue transition-all duration-500"
+              className="h-full bg-cyan-400 transition-all duration-500"
               style={{ width: `${vitals?.storage?.usedPercentage || 0}%` }}
             />
           </div>
-          <div className="mt-1.5 font-mono text-[10px] text-fg-subtle">
-            {vitals?.storage?.usedPercentage || 0}% Allocated
+          <div className="mt-1.5 font-mono text-[10px] text-slate-400">
+            {vitals?.storage?.usedPercentage || 0}% In Use
           </div>
         </div>
 
         {/* Temperature */}
-        <div className="rounded-xl border border-white/10 bg-bg-panel/90 p-4 backdrop-blur-md shadow-lg transition-all hover:border-white/20">
-          <div className="flex items-center justify-between text-fg-subtle">
-            <span className="font-mono text-[10px] uppercase font-semibold">THERMAL</span>
+        <div className="hud-card rounded-xl p-4 transition-all hover:border-amber-400/50">
+          <div className="flex items-center justify-between text-slate-400">
+            <span className="font-orbitron text-[10px] uppercase font-bold tracking-wider text-amber-400">THERMAL</span>
             <Thermometer className="h-4 w-4 text-amber-400" />
           </div>
-          <div className="mt-2.5 font-mono text-2xl font-bold text-fg">
+          <div className="mt-2.5 font-orbitron text-2xl font-black text-amber-300">
             {cpuTemp}°C
           </div>
           <div className="mt-2 flex items-center space-x-1 font-mono text-[10px]">
@@ -205,48 +205,48 @@ export default function DashboardPage() {
                 cpuTemp > 45 ? 'bg-rose-500' : cpuTemp > 38 ? 'bg-amber-400' : 'bg-emerald-400'
               }`}
             />
-            <span className="text-fg-subtle">
+            <span className="text-slate-400">
               {cpuTemp > 45 ? 'High Load' : cpuTemp > 38 ? 'Moderate' : 'Optimal'}
             </span>
           </div>
-          <div className="mt-1.5 font-mono text-[10px] text-fg-subtle">
+          <div className="mt-1.5 font-mono text-[10px] text-slate-400">
             Hardware Sensor
           </div>
         </div>
 
         {/* Battery */}
-        <div className="rounded-xl border border-white/10 bg-bg-panel/90 p-4 backdrop-blur-md shadow-lg transition-all hover:border-white/20">
-          <div className="flex items-center justify-between text-fg-subtle">
-            <span className="font-mono text-[10px] uppercase font-semibold">BATTERY</span>
+        <div className="hud-card-green rounded-xl p-4 transition-all hover:border-emerald-400/50">
+          <div className="flex items-center justify-between text-slate-400">
+            <span className="font-orbitron text-[10px] uppercase font-bold tracking-wider text-emerald-400">BATTERY</span>
             <Battery className="h-4 w-4 text-emerald-400" />
           </div>
-          <div className="mt-2.5 font-mono text-2xl font-bold text-fg">
+          <div className="mt-2.5 font-orbitron text-2xl font-black text-emerald-300 text-glow-green">
             {vitals?.battery?.level ?? 100}%
           </div>
-          <div className="mt-2 flex items-center space-x-1 font-mono text-[10px] text-fg-muted">
+          <div className="mt-2 flex items-center space-x-1 font-mono text-[10px] text-slate-400">
             <Zap className="h-3 w-3 text-amber-400" />
             <span className="truncate">
               {vitals?.battery?.isCharging ? 'Charging' : vitals?.battery?.status || 'Active'}
             </span>
           </div>
-          <div className="mt-1.5 font-mono text-[10px] text-fg-subtle">
+          <div className="mt-1.5 font-mono text-[10px] text-slate-400">
             Wake Lock On
           </div>
         </div>
 
         {/* Network & Uptime */}
-        <div className="rounded-xl border border-white/10 bg-bg-panel/90 p-4 backdrop-blur-md shadow-lg transition-all hover:border-white/20">
-          <div className="flex items-center justify-between text-fg-subtle">
-            <span className="font-mono text-[10px] uppercase font-semibold">UPTIME</span>
-            <Clock className="h-4 w-4 text-accent-blue" />
+        <div className="hud-card rounded-xl p-4 transition-all hover:border-cyan-400/50">
+          <div className="flex items-center justify-between text-slate-400">
+            <span className="font-orbitron text-[10px] uppercase font-bold tracking-wider text-cyan-400">UPTIME</span>
+            <Clock className="h-4 w-4 text-cyan-400" />
           </div>
-          <div className="mt-2.5 font-mono text-xl font-bold text-fg truncate">
+          <div className="mt-2.5 font-orbitron text-xl font-black text-cyan-300 truncate">
             {vitals ? formatUptime(vitals.uptimeSeconds) : '0m'}
           </div>
-          <div className="mt-2 font-mono text-[11px] text-fg-muted">
+          <div className="mt-2 font-mono text-[11px] text-slate-400">
             ↓ {formatBytes(vitals?.network?.rxBytesPerSec || 0)}/s
           </div>
-          <div className="font-mono text-[10px] text-fg-subtle">
+          <div className="font-mono text-[10px] text-slate-500">
             ↑ {formatBytes(vitals?.network?.txBytesPerSec || 0)}/s
           </div>
         </div>
@@ -256,85 +256,85 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Link
           href="/files"
-          className="group flex items-center justify-between rounded-xl border border-white/10 bg-bg-panel/90 p-5 backdrop-blur-md shadow-md hover:border-accent-blue hover:bg-accent-blue/5 transition-all"
+          className="group flex items-center justify-between hud-card rounded-xl p-5 hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(0,240,255,0.15)] transition-all"
         >
           <div className="flex items-center space-x-4">
-            <div className="rounded-xl border border-accent-blue/30 bg-accent-blue/15 p-3 text-accent-blue group-hover:scale-105 transition-transform">
+            <div className="rounded-lg border border-cyan-500/40 bg-cyan-950/30 p-3 text-cyan-400 group-hover:scale-105 transition-transform">
               <Folder className="h-6 w-6" />
             </div>
             <div>
-              <div className="font-mono text-xs font-bold text-fg group-hover:text-accent-blue">
+              <div className="font-orbitron text-xs font-bold tracking-wider text-slate-200 group-hover:text-cyan-300">
                 FILES & STORAGE NAS
               </div>
-              <div className="font-mono text-[11px] text-fg-subtle">
+              <div className="font-mono text-[11px] text-slate-400">
                 Browse, upload, download, and manage storage
               </div>
             </div>
           </div>
-          <ArrowUpRight className="h-4 w-4 text-fg-subtle group-hover:text-accent-blue transition-colors" />
+          <ArrowUpRight className="h-4 w-4 text-slate-500 group-hover:text-cyan-400 transition-colors" />
         </Link>
 
         <Link
           href="/terminal"
-          className="group flex items-center justify-between rounded-xl border border-white/10 bg-bg-panel/90 p-5 backdrop-blur-md shadow-md hover:border-emerald-500 hover:bg-emerald-500/5 transition-all"
+          className="group flex items-center justify-between hud-card-green rounded-xl p-5 hover:border-emerald-400 hover:shadow-[0_0_20px_rgba(0,255,136,0.15)] transition-all"
         >
           <div className="flex items-center space-x-4">
-            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/15 p-3 text-emerald-400 group-hover:scale-105 transition-transform">
+            <div className="rounded-lg border border-emerald-500/40 bg-emerald-950/30 p-3 text-emerald-400 group-hover:scale-105 transition-transform">
               <Terminal className="h-6 w-6" />
             </div>
             <div>
-              <div className="font-mono text-xs font-bold text-fg group-hover:text-emerald-400">
+              <div className="font-orbitron text-xs font-bold tracking-wider text-slate-200 group-hover:text-emerald-300">
                 WEB TERMINAL
               </div>
-              <div className="font-mono text-[11px] text-fg-subtle">
+              <div className="font-mono text-[11px] text-slate-400">
                 Interactive Termux shell & command line
               </div>
             </div>
           </div>
-          <ArrowUpRight className="h-4 w-4 text-fg-subtle group-hover:text-emerald-400 transition-colors" />
+          <ArrowUpRight className="h-4 w-4 text-slate-500 group-hover:text-emerald-400 transition-colors" />
         </Link>
 
         <Link
           href="/system"
-          className="group flex items-center justify-between rounded-xl border border-white/10 bg-bg-panel/90 p-5 backdrop-blur-md shadow-md hover:border-purple-500 hover:bg-purple-500/5 transition-all sm:col-span-2 lg:col-span-1"
+          className="group flex items-center justify-between hud-card rounded-xl p-5 hover:border-purple-400 hover:shadow-[0_0_20px_rgba(168,85,247,0.15)] transition-all sm:col-span-2 lg:col-span-1"
         >
           <div className="flex items-center space-x-4">
-            <div className="rounded-xl border border-purple-500/30 bg-purple-500/15 p-3 text-purple-400 group-hover:scale-105 transition-transform">
+            <div className="rounded-lg border border-purple-500/40 bg-purple-950/30 p-3 text-purple-400 group-hover:scale-105 transition-transform">
               <Smartphone className="h-6 w-6" />
             </div>
             <div>
-              <div className="font-mono text-xs font-bold text-fg group-hover:text-purple-400">
+              <div className="font-orbitron text-xs font-bold tracking-wider text-slate-200 group-hover:text-purple-300">
                 HARDWARE & ENVIRONMENT
               </div>
-              <div className="font-mono text-[11px] text-fg-subtle">
+              <div className="font-mono text-[11px] text-slate-400">
                 Battery health, memory breakdown & sensors
               </div>
             </div>
           </div>
-          <ArrowUpRight className="h-4 w-4 text-fg-subtle group-hover:text-purple-400 transition-colors" />
+          <ArrowUpRight className="h-4 w-4 text-slate-500 group-hover:text-purple-400 transition-colors" />
         </Link>
       </div>
 
       {/* Live System Activity Feed */}
-      <div className="rounded-xl border border-white/10 bg-bg-panel/90 backdrop-blur-md p-5 shadow-xl space-y-4">
-        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+      <div className="hud-card rounded-xl p-5 shadow-2xl space-y-4">
+        <div className="flex items-center justify-between border-b border-cyan-500/20 pb-3">
           <div className="flex items-center space-x-2">
-            <Activity className="h-4 w-4 text-accent-blue" />
-            <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-fg">
+            <Activity className="h-4 w-4 text-cyan-400" />
+            <h2 className="font-orbitron text-xs font-bold uppercase tracking-widest text-cyan-300">
               LIVE SYSTEM ACTIVITY LOGS
             </h2>
           </div>
           <Link
             href="/activity"
-            className="font-mono text-xs text-accent-blue hover:underline flex items-center space-x-1"
+            className="font-orbitron text-xs text-cyan-400 hover:text-cyan-300 flex items-center space-x-1"
           >
-            <span>View All</span>
+            <span>VIEW ALL</span>
             <ArrowUpRight className="h-3 w-3" />
           </Link>
         </div>
 
         {recentLogs.length === 0 ? (
-          <div className="py-8 text-center font-mono text-xs text-fg-subtle">
+          <div className="py-8 text-center font-mono text-xs text-slate-500">
             Listening for system operations and security events...
           </div>
         ) : (
@@ -342,33 +342,33 @@ export default function DashboardPage() {
             <table className="w-full tech-table font-mono text-xs">
               <thead>
                 <tr>
-                  <th>Timestamp</th>
-                  <th>Action</th>
-                  <th>Target</th>
-                  <th>User</th>
-                  <th>Status</th>
+                  <th>TIMESTAMP</th>
+                  <th>ACTION</th>
+                  <th>TARGET</th>
+                  <th>USER</th>
+                  <th>STATUS</th>
                 </tr>
               </thead>
               <tbody>
                 {recentLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="text-fg-subtle text-[11px]">
+                  <tr key={log.id} className="hover:bg-cyan-500/5 transition-colors">
+                    <td className="text-slate-400 text-[11px]">
                       {new Date(log.timestamp).toLocaleTimeString()}
                     </td>
-                    <td className="font-semibold text-fg">
-                      <span className="rounded bg-white/5 px-1.5 py-0.5 text-[10px] text-accent-blue border border-white/10">
+                    <td className="font-semibold text-slate-200">
+                      <span className="rounded bg-cyan-950/40 px-2 py-0.5 text-[10px] font-orbitron text-cyan-400 border border-cyan-500/30">
                         {log.action}
                       </span>
                     </td>
-                    <td className="text-fg-muted truncate max-w-[200px]">
+                    <td className="text-slate-300 truncate max-w-[200px]">
                       {log.target}
                     </td>
-                    <td className="text-fg-muted">
+                    <td className="text-slate-400">
                       {log.username}
                     </td>
                     <td>
                       <span
-                        className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
+                        className={`rounded px-2 py-0.5 text-[10px] font-orbitron font-semibold ${
                           log.status === 'SUCCESS'
                             ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
                             : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'

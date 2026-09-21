@@ -68,31 +68,31 @@ export function Sidebar({ user, isOpen, onClose }: SidebarProps) {
         }`}
       >
         {/* Brand / Header */}
-        <div className="flex h-16 items-center justify-between border-b border-border/80 px-4 bg-bg-base/40 backdrop-blur-md">
+        <div className="relative flex h-16 items-center justify-between border-b border-cyan-500/20 px-4 bg-black/60 backdrop-blur-md">
           <div className="flex items-center space-x-2.5">
             <div className="relative flex h-2.5 w-2.5 items-center justify-center">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-green opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-accent-green" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
             </div>
             <div className="flex flex-col">
-              <span className="font-mono text-xs font-bold tracking-wider text-fg">
+              <span className="font-orbitron text-xs font-bold tracking-widest text-cyan-400 text-glow-cyan">
                 PHONE NAS
               </span>
-              <span className="font-mono text-[9px] text-fg-subtle">
-                ARM64 PERSONAL SERVER
+              <span className="font-mono text-[9px] tracking-wider text-slate-400">
+                ARM64 RUNTIME
               </span>
             </div>
           </div>
-          <span className="rounded-full bg-accent-green/10 border border-accent-green/30 px-2 py-0.5 font-mono text-[10px] font-medium text-accent-green">
-            LIVE
+          <span className="rounded bg-emerald-500/10 border border-emerald-500/40 px-2 py-0.5 font-orbitron text-[9px] font-bold tracking-widest text-emerald-400">
+            ONLINE
           </span>
         </div>
 
         {/* Navigation Items */}
         <div className="flex-1 overflow-y-auto px-2 py-4 space-y-6">
           <div>
-            <div className="px-3 pb-2 font-mono text-[11px] uppercase tracking-wider text-fg-subtle">
-              Operations
+            <div className="px-3 pb-2 font-orbitron text-[10px] uppercase tracking-widest text-slate-500">
+              OPERATIONS
             </div>
             <nav className="space-y-1">
               {navItems.map((item) => {
@@ -103,14 +103,14 @@ export function Sidebar({ user, isOpen, onClose }: SidebarProps) {
                     key={item.href}
                     href={item.href}
                     onClick={onClose}
-                    className={`flex items-center space-x-3 rounded px-3 py-2 text-xs font-mono transition-colors ${
+                    className={`flex items-center space-x-3 rounded px-3 py-2 text-xs font-mono tracking-wider transition-all ${
                       isActive
-                        ? 'bg-accent-blue-subtle text-accent-blue border-l-2 border-accent-blue font-medium'
-                        : 'text-fg-muted hover:bg-bg-hover hover:text-fg'
+                        ? 'bg-cyan-500/10 text-cyan-300 border-l-2 border-cyan-400 font-bold shadow-[inset_0_0_12px_rgba(0,240,255,0.08)]'
+                        : 'text-slate-400 hover:bg-slate-900/60 hover:text-cyan-400 hover:border-l-2 hover:border-slate-600'
                     }`}
                   >
                     <Icon className="h-4 w-4 shrink-0" />
-                    <span>{item.label}</span>
+                    <span className="font-orbitron text-[11px]">{item.label}</span>
                   </Link>
                 );
               })}
@@ -119,9 +119,9 @@ export function Sidebar({ user, isOpen, onClose }: SidebarProps) {
 
           {isAdmin && (
             <div>
-              <div className="px-3 pb-2 font-mono text-[11px] uppercase tracking-wider text-fg-subtle flex items-center justify-between">
-                <span>Administration</span>
-                <Shield className="h-3 w-3 text-accent-blue" />
+              <div className="px-3 pb-2 font-orbitron text-[10px] uppercase tracking-widest text-slate-500 flex items-center justify-between">
+                <span>SECURITY & ADMIN</span>
+                <Shield className="h-3 w-3 text-cyan-400" />
               </div>
               <nav className="space-y-1">
                 {adminItems.map((item) => {
@@ -132,14 +132,14 @@ export function Sidebar({ user, isOpen, onClose }: SidebarProps) {
                       key={item.href}
                       href={item.href}
                       onClick={onClose}
-                      className={`flex items-center space-x-3 rounded px-3 py-2 text-xs font-mono transition-colors ${
+                      className={`flex items-center space-x-3 rounded px-3 py-2 text-xs font-mono tracking-wider transition-all ${
                         isActive
-                          ? 'bg-accent-blue-subtle text-accent-blue border-l-2 border-accent-blue font-medium'
-                          : 'text-fg-muted hover:bg-bg-hover hover:text-fg'
+                          ? 'bg-cyan-500/10 text-cyan-300 border-l-2 border-cyan-400 font-bold shadow-[inset_0_0_12px_rgba(0,240,255,0.08)]'
+                          : 'text-slate-400 hover:bg-slate-900/60 hover:text-cyan-400 hover:border-l-2 hover:border-slate-600'
                       }`}
                     >
                       <Icon className="h-4 w-4 shrink-0" />
-                      <span>{item.label}</span>
+                      <span className="font-orbitron text-[11px]">{item.label}</span>
                     </Link>
                   );
                 })}
@@ -149,20 +149,20 @@ export function Sidebar({ user, isOpen, onClose }: SidebarProps) {
         </div>
 
         {/* User Footer */}
-        <div className="border-t border-border p-3 bg-bg-subtle">
+        <div className="border-t border-cyan-500/20 p-3 bg-black/60">
           <div className="flex items-center justify-between">
             <div className="flex flex-col truncate pr-2">
-              <span className="truncate font-mono text-xs text-fg">
+              <span className="truncate font-mono text-xs text-slate-200">
                 {user?.username || 'anonymous'}
               </span>
-              <span className="font-mono text-[10px] text-fg-subtle">
+              <span className="font-orbitron text-[9px] tracking-wider text-cyan-400/80">
                 ROLE: {user?.role || 'USER'}
               </span>
             </div>
             <button
               onClick={handleLogout}
               title="Logout"
-              className="rounded p-1.5 text-fg-muted hover:bg-bg-hover hover:text-accent-red transition-colors"
+              className="rounded p-1.5 text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-colors"
             >
               <LogOut className="h-4 w-4" />
             </button>

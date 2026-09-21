@@ -3,6 +3,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// SIGHUP, SIGTERM & Crash Guard for persistent Termux daemon operation
+process.on('SIGHUP', () => {
+    console.log('[DAEMON] Intercepted SIGHUP (Termux detached or backgrounded). Server continuing uninterrupted.');
+});
+process.on('SIGTERM', () => {
+    console.log('[DAEMON] Intercepted SIGTERM signal. Keeping listener alive.');
+});
+process.on('uncaughtException', (err) => {
+    console.error('[CRASH_GUARD] Intercepted Uncaught Exception:', err);
+});
+process.on('unhandledRejection', (reason) => {
+    console.error('[CRASH_GUARD] Intercepted Unhandled Rejection:', reason);
+});
 const http_1 = __importDefault(require("http"));
 const express_1 = __importDefault(require("express"));
 const helmet_1 = __importDefault(require("helmet"));
@@ -105,7 +118,7 @@ async function bootstrap() {
             code: err.code || 'INTERNAL_ERROR',
         });
     });
-    // 6. Start Listener
+    // 7. Start Listener
     server.listen(config_1.CONFIG.PORT, config_1.CONFIG.HOST, () => {
         const deviceInfo = device_info_1.DeviceInfoService.getDeviceInfo();
         console.log('====================================================');
@@ -123,13 +136,6 @@ async function bootstrap() {
         console.log('====================================================');
     });
 }
-// Global Crash Guard so unexpected network drops never crash the Termux server
-process.on('uncaughtException', (err) => {
-    console.error('[CRASH_GUARD] Uncaught Exception intercepted:', err);
-});
-process.on('unhandledRejection', (reason) => {
-    console.error('[CRASH_GUARD] Unhandled Rejection intercepted:', reason);
-});
 bootstrap().catch((err) => {
     console.error('[FATAL] Failed to start server:', err);
     process.exit(1);

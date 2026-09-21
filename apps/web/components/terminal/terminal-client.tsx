@@ -21,22 +21,23 @@ export default function TerminalClient() {
 
     const term = new Terminal({
       cursorBlink: true,
+      convertEol: true, // Fixes Linux/Unix staircase newline formatting
       fontFamily: "'JetBrains Mono', 'Fira Code', Menlo, monospace",
       fontSize: 13,
-      lineHeight: 1.2,
+      lineHeight: 1.25,
       theme: {
-        background: '#080808',
-        foreground: '#ededed',
-        cursor: '#3b82f6',
-        selectionBackground: '#1d4ed8',
-        black: '#121212',
-        red: '#ef4444',
-        green: '#22c55e',
-        yellow: '#eab308',
-        blue: '#3b82f6',
-        magenta: '#a855f7',
-        cyan: '#06b6d4',
-        white: '#ededed',
+        background: '#07070a',
+        foreground: '#e2e8f0',
+        cursor: '#00f0ff',
+        selectionBackground: 'rgba(0, 240, 255, 0.25)',
+        black: '#07070a',
+        red: '#ff3366',
+        green: '#00ff88',
+        yellow: '#ffb700',
+        blue: '#00f0ff',
+        magenta: '#ff007f',
+        cyan: '#00f0ff',
+        white: '#e2e8f0',
       },
     });
 
@@ -121,23 +122,25 @@ export default function TerminalClient() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-6.5rem)] flex-col rounded border border-border bg-bg-panel overflow-hidden">
+    <div className="flex h-[calc(100vh-6.5rem)] flex-col hud-card rounded-xl overflow-hidden shadow-2xl">
       {/* Terminal Top Bar */}
-      <div className="flex h-11 items-center justify-between border-b border-border bg-bg-subtle px-4 font-mono text-xs">
+      <div className="flex h-12 items-center justify-between border-b border-cyan-500/20 bg-black/50 px-4 font-mono text-xs backdrop-blur-md">
         <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-1.5">
-            <TermIcon className="h-4 w-4 text-accent-green" />
-            <span className="font-semibold text-fg">PHONE_SHELL_CONSOLE</span>
+          <div className="flex items-center space-x-2">
+            <TermIcon className="h-4 w-4 text-cyan-400" />
+            <span className="font-orbitron font-bold text-xs tracking-wider text-cyan-400 text-glow-cyan">
+              TERMINAL CONSOLE
+            </span>
           </div>
 
-          <div className="flex items-center space-x-1.5 rounded-full bg-black/40 px-2.5 py-0.5 border border-white/10">
+          <div className="flex items-center space-x-1.5 rounded-full bg-cyan-950/40 px-2.5 py-0.5 border border-cyan-500/30">
             <div
               className={`h-2 w-2 rounded-full ${
                 connected ? 'bg-emerald-400 animate-pulse' : 'bg-rose-500'
               }`}
             />
-            <span className={`text-[10px] font-semibold ${connected ? 'text-emerald-400' : 'text-rose-500'}`}>
-              {connected ? 'ACTIVE' : 'DISCONNECTED'}
+            <span className={`text-[10px] font-orbitron font-bold tracking-wide ${connected ? 'text-emerald-400' : 'text-rose-500'}`}>
+              {connected ? '[ONLINE]' : '[OFFLINE]'}
             </span>
           </div>
         </div>

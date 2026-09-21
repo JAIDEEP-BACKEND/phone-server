@@ -18,7 +18,7 @@ exports.settingsRouter.get('/', (0, rbac_middleware_1.requirePermission)(shared_
             storageRoot: config_1.CONFIG.STORAGE_ROOT,
             maxUploadSizeMb: config_1.CONFIG.MAX_UPLOAD_SIZE_MB.toString(),
             sessionTtlHours: config_1.CONFIG.SESSION_TTL_HOURS.toString(),
-            deviceName: 'OPPO Android Server',
+            deviceName: 'Android Personal Server',
             rateLimitAttempts: config_1.CONFIG.RATE_LIMIT_MAX_ATTEMPTS.toString(),
         };
         for (const r of rows) {

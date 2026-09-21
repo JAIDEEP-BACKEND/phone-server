@@ -1,3 +1,17 @@
+// SIGHUP, SIGTERM & Crash Guard for persistent Termux daemon operation
+process.on('SIGHUP', () => {
+  console.log('[DAEMON] Intercepted SIGHUP (Termux detached or backgrounded). Server continuing uninterrupted.');
+});
+process.on('SIGTERM', () => {
+  console.log('[DAEMON] Intercepted SIGTERM signal. Keeping listener alive.');
+});
+process.on('uncaughtException', (err) => {
+  console.error('[CRASH_GUARD] Intercepted Uncaught Exception:', err);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[CRASH_GUARD] Intercepted Unhandled Rejection:', reason);
+});
+
 import http from 'http';
 import express from 'express';
 import helmet from 'helmet';
@@ -114,7 +128,7 @@ async function bootstrap() {
     });
   });
 
-  // 6. Start Listener
+  // 7. Start Listener
   server.listen(CONFIG.PORT, CONFIG.HOST, () => {
     const deviceInfo = DeviceInfoService.getDeviceInfo();
     console.log('====================================================');
@@ -132,14 +146,6 @@ async function bootstrap() {
     console.log('====================================================');
   });
 }
-
-// Global Crash Guard so unexpected network drops never crash the Termux server
-process.on('uncaughtException', (err) => {
-  console.error('[CRASH_GUARD] Uncaught Exception intercepted:', err);
-});
-process.on('unhandledRejection', (reason) => {
-  console.error('[CRASH_GUARD] Unhandled Rejection intercepted:', reason);
-});
 
 bootstrap().catch((err) => {
   console.error('[FATAL] Failed to start server:', err);

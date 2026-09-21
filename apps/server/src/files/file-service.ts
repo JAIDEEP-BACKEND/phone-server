@@ -240,7 +240,7 @@ export class FileService {
 
     // Default fallback for development when statfs is not supported on host OS volume
     return {
-      totalBytes: 128 * 1024 * 1024 * 1024, // 128 GB target OPPO phone storage
+      totalBytes: 128 * 1024 * 1024 * 1024, // 128 GB phone storage
       usedBytes: 42 * 1024 * 1024 * 1024,
       freeBytes: 86 * 1024 * 1024 * 1024,
       usedPercentage: 33,

@@ -99,12 +99,17 @@ export class PtyService {
         '\r\n\x1b[1;36m=== PHONE NAS SHELL (TERMUX) ===\x1b[0m\r\n\x1b[90mReady. Try commands: ls, df -h, free -m, top, ip a, termux-battery-status\x1b[0m\r\n\r\n'
       );
 
+      // Normalize newlines to \r\n so cursor always returns to column 0 (prevents staircase effect)
+      const formatOutput = (text: string) => {
+        return text.replace(/\r\n/g, '\n').replace(/\n/g, '\r\n');
+      };
+
       child.stdout?.on('data', (chunk: Buffer) => {
-        socket.emit(SOCKET_EVENTS.TERMINAL_DATA, chunk.toString('utf-8'));
+        socket.emit(SOCKET_EVENTS.TERMINAL_DATA, formatOutput(chunk.toString('utf-8')));
       });
 
       child.stderr?.on('data', (chunk: Buffer) => {
-        socket.emit(SOCKET_EVENTS.TERMINAL_DATA, chunk.toString('utf-8'));
+        socket.emit(SOCKET_EVENTS.TERMINAL_DATA, formatOutput(chunk.toString('utf-8')));
       });
 
       child.on('close', (code: number) => {

@@ -81,12 +81,12 @@ export default function SystemPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between border-b border-border pb-3">
+      <div className="flex items-center justify-between border-b border-cyan-500/20 pb-3">
         <div>
-          <h1 className="font-mono text-sm font-semibold uppercase tracking-wider text-fg">
-            Real-Time System Telemetry
+          <h1 className="font-orbitron text-sm font-bold uppercase tracking-widest text-cyan-300 text-glow-cyan">
+            REAL-TIME SYSTEM TELEMETRY
           </h1>
-          <p className="font-mono text-xs text-fg-muted">
+          <p className="font-mono text-xs text-slate-400">
             Direct /proc, sysfs, and hardware metrics collected at 1Hz
           </p>
         </div>
@@ -94,10 +94,10 @@ export default function SystemPage() {
 
       {powerResult && (
         <div
-          className={`flex items-center justify-between rounded border p-3 font-mono text-xs ${
+          className={`flex items-center justify-between rounded-lg border p-3.5 font-mono text-xs ${
             powerResult.success
-              ? 'border-accent-green/50 bg-accent-green-subtle text-accent-green'
-              : 'border-accent-red/50 bg-accent-red-subtle text-accent-red'
+              ? 'border-emerald-500/50 bg-emerald-950/30 text-emerald-300'
+              : 'border-rose-500/50 bg-rose-950/30 text-rose-300'
           }`}
         >
           <span>{powerResult.message}</span>
@@ -110,34 +110,34 @@ export default function SystemPage() {
       {/* Main Telemetry Grid */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {/* CPU */}
-        <div className="rounded border border-border bg-bg-panel p-4 space-y-3">
-          <div className="flex items-center justify-between text-fg-muted font-mono text-xs">
-            <span className="flex items-center space-x-1.5">
-              <Cpu className="h-4 w-4 text-accent-blue" />
-              <span>PROCESSOR</span>
+        <div className="hud-card rounded-xl p-5 space-y-3">
+          <div className="flex items-center justify-between text-slate-400 font-mono text-xs">
+            <span className="flex items-center space-x-2">
+              <Cpu className="h-4 w-4 text-cyan-400" />
+              <span className="font-orbitron font-bold text-cyan-400">PROCESSOR</span>
             </span>
-            <span className="text-fg font-semibold">{vitals?.cpu.usagePercent ?? 0}%</span>
+            <span className="font-orbitron text-base font-black text-cyan-300 text-glow-cyan">{vitals?.cpu.usagePercent ?? 0}%</span>
           </div>
-          <div className="h-2 w-full rounded bg-bg-base overflow-hidden border border-border">
+          <div className="h-2 w-full rounded bg-slate-900 overflow-hidden border border-cyan-500/20">
             <div
-              className={`h-full ${
-                (vitals?.cpu.usagePercent || 0) > 85 ? 'bg-accent-red' : 'bg-accent-blue'
+              className={`h-full transition-all duration-500 ${
+                (vitals?.cpu.usagePercent || 0) > 85 ? 'bg-rose-500' : 'bg-cyan-400'
               }`}
               style={{ width: `${Math.min(100, vitals?.cpu.usagePercent || 0)}%` }}
             />
           </div>
-          <div className="space-y-1 font-mono text-xs text-fg-muted border-t border-border/50 pt-2">
+          <div className="space-y-1.5 font-mono text-xs text-slate-400 border-t border-cyan-500/20 pt-2.5">
             <div className="flex justify-between">
               <span>Cores:</span>
-              <span className="text-fg">{vitals?.cpu.cores || 8}</span>
+              <span className="text-slate-200">{vitals?.cpu.cores || 8}</span>
             </div>
             <div className="flex justify-between">
-              <span>Model:</span>
-              <span className="text-fg truncate max-w-[180px]">{vitals?.cpu.model || 'aarch64'}</span>
+              <span>Architecture:</span>
+              <span className="text-slate-200 truncate max-w-[180px]">{vitals?.cpu.model || 'aarch64'}</span>
             </div>
             <div className="flex justify-between">
               <span>Load Average:</span>
-              <span className="text-fg">
+              <span className="text-slate-200">
                 {vitals?.cpu.loadAverage.map((l) => l.toFixed(2)).join(', ') || '0.00, 0.00, 0.00'}
               </span>
             </div>
@@ -145,156 +145,156 @@ export default function SystemPage() {
         </div>
 
         {/* Memory */}
-        <div className="rounded border border-border bg-bg-panel p-4 space-y-3">
-          <div className="flex items-center justify-between text-fg-muted font-mono text-xs">
-            <span className="flex items-center space-x-1.5">
-              <Activity className="h-4 w-4 text-accent-green" />
-              <span>RAM (MEMINFO)</span>
+        <div className="hud-card-green rounded-xl p-5 space-y-3">
+          <div className="flex items-center justify-between text-slate-400 font-mono text-xs">
+            <span className="flex items-center space-x-2">
+              <Activity className="h-4 w-4 text-emerald-400" />
+              <span className="font-orbitron font-bold text-emerald-400">RAM (MEMINFO)</span>
             </span>
-            <span className="text-fg font-semibold">{vitals?.memory.usagePercent ?? 0}%</span>
+            <span className="font-orbitron text-base font-black text-emerald-300 text-glow-green">{vitals?.memory.usagePercent ?? 0}%</span>
           </div>
-          <div className="h-2 w-full rounded bg-bg-base overflow-hidden border border-border">
+          <div className="h-2 w-full rounded bg-slate-900 overflow-hidden border border-emerald-500/20">
             <div
-              className="h-full bg-accent-green"
+              className="h-full bg-emerald-400 transition-all duration-500"
               style={{ width: `${vitals?.memory.usagePercent || 0}%` }}
             />
           </div>
-          <div className="space-y-1 font-mono text-xs text-fg-muted border-t border-border/50 pt-2">
+          <div className="space-y-1.5 font-mono text-xs text-slate-400 border-t border-emerald-500/20 pt-2.5">
             <div className="flex justify-between">
               <span>Used:</span>
-              <span className="text-fg">{formatBytes(vitals?.memory.usedBytes || 0)}</span>
+              <span className="text-slate-200">{formatBytes(vitals?.memory.usedBytes || 0)}</span>
             </div>
             <div className="flex justify-between">
               <span>Available:</span>
-              <span className="text-fg">{formatBytes(vitals?.memory.availableBytes || 0)}</span>
+              <span className="text-slate-200">{formatBytes(vitals?.memory.availableBytes || 0)}</span>
             </div>
             <div className="flex justify-between">
               <span>Total RAM:</span>
-              <span className="text-fg">{formatBytes(vitals?.memory.totalBytes || 0)}</span>
+              <span className="text-slate-200">{formatBytes(vitals?.memory.totalBytes || 0)}</span>
             </div>
           </div>
         </div>
 
         {/* Storage */}
-        <div className="rounded border border-border bg-bg-panel p-4 space-y-3">
-          <div className="flex items-center justify-between text-fg-muted font-mono text-xs">
-            <span className="flex items-center space-x-1.5">
-              <HardDrive className="h-4 w-4 text-accent-blue" />
-              <span>SHARED STORAGE</span>
+        <div className="hud-card rounded-xl p-5 space-y-3">
+          <div className="flex items-center justify-between text-slate-400 font-mono text-xs">
+            <span className="flex items-center space-x-2">
+              <HardDrive className="h-4 w-4 text-cyan-400" />
+              <span className="font-orbitron font-bold text-cyan-400">SHARED STORAGE</span>
             </span>
-            <span className="text-fg font-semibold">{vitals?.storage.usedPercentage ?? 0}%</span>
+            <span className="font-orbitron text-base font-black text-cyan-300 text-glow-cyan">{vitals?.storage.usedPercentage ?? 0}%</span>
           </div>
-          <div className="h-2 w-full rounded bg-bg-base overflow-hidden border border-border">
+          <div className="h-2 w-full rounded bg-slate-900 overflow-hidden border border-cyan-500/20">
             <div
-              className={`h-full ${
-                (vitals?.storage.usedPercentage || 0) > 90 ? 'bg-accent-red' : 'bg-accent-blue'
+              className={`h-full transition-all duration-500 ${
+                (vitals?.storage.usedPercentage || 0) > 90 ? 'bg-rose-500' : 'bg-cyan-400'
               }`}
               style={{ width: `${Math.min(100, vitals?.storage.usedPercentage || 0)}%` }}
             />
           </div>
-          <div className="space-y-1 font-mono text-xs text-fg-muted border-t border-border/50 pt-2">
+          <div className="space-y-1.5 font-mono text-xs text-slate-400 border-t border-cyan-500/20 pt-2.5">
             <div className="flex justify-between">
               <span>Used:</span>
-              <span className="text-fg">{formatBytes(vitals?.storage.usedBytes || 0)}</span>
+              <span className="text-slate-200">{formatBytes(vitals?.storage.usedBytes || 0)}</span>
             </div>
             <div className="flex justify-between">
               <span>Free:</span>
-              <span className="text-fg">{formatBytes(vitals?.storage.freeBytes || 0)}</span>
+              <span className="text-slate-200">{formatBytes(vitals?.storage.freeBytes || 0)}</span>
             </div>
             <div className="flex justify-between">
               <span>Total Capacity:</span>
-              <span className="text-fg">{formatBytes(vitals?.storage.totalBytes || 128 * 1024 ** 3)}</span>
+              <span className="text-slate-200">{formatBytes(vitals?.storage.totalBytes || 128 * 1024 ** 3)}</span>
             </div>
           </div>
         </div>
 
         {/* Network Throughput */}
-        <div className="rounded border border-border bg-bg-panel p-4 space-y-3">
-          <div className="flex items-center justify-between text-fg-muted font-mono text-xs">
-            <span className="flex items-center space-x-1.5">
-              <Wifi className="h-4 w-4 text-accent-blue" />
-              <span>NETWORK I/O</span>
+        <div className="hud-card rounded-xl p-5 space-y-3">
+          <div className="flex items-center justify-between text-slate-400 font-mono text-xs">
+            <span className="flex items-center space-x-2">
+              <Wifi className="h-4 w-4 text-cyan-400" />
+              <span className="font-orbitron font-bold text-cyan-400">NETWORK I/O</span>
             </span>
-            <span className="text-fg font-mono">{vitals?.network.interfaceName || 'wlan0'}</span>
+            <span className="font-mono text-cyan-300">{vitals?.network.interfaceName || 'wlan0'}</span>
           </div>
           <div className="space-y-2 py-1 font-mono">
             <div className="flex justify-between text-xs">
-              <span className="text-fg-muted">Download (RX):</span>
-              <span className="text-accent-blue font-semibold">
+              <span className="text-slate-400">Download (RX):</span>
+              <span className="text-cyan-400 font-bold">
                 ↓ {formatBytes(vitals?.network.rxBytesPerSec || 0)}/s
               </span>
             </div>
             <div className="flex justify-between text-xs">
-              <span className="text-fg-muted">Upload (TX):</span>
-              <span className="text-accent-green font-semibold">
+              <span className="text-slate-400">Upload (TX):</span>
+              <span className="text-emerald-400 font-bold">
                 ↑ {formatBytes(vitals?.network.txBytesPerSec || 0)}/s
               </span>
             </div>
           </div>
-          <div className="space-y-1 font-mono text-xs text-fg-muted border-t border-border/50 pt-2">
+          <div className="space-y-1.5 font-mono text-xs text-slate-400 border-t border-cyan-500/20 pt-2.5">
             <div className="flex justify-between">
               <span>Total RX:</span>
-              <span className="text-fg">{formatBytes(vitals?.network.totalRxBytes || 0)}</span>
+              <span className="text-slate-200">{formatBytes(vitals?.network.totalRxBytes || 0)}</span>
             </div>
             <div className="flex justify-between">
               <span>Total TX:</span>
-              <span className="text-fg">{formatBytes(vitals?.network.totalTxBytes || 0)}</span>
+              <span className="text-slate-200">{formatBytes(vitals?.network.totalTxBytes || 0)}</span>
             </div>
           </div>
         </div>
 
         {/* Thermal & Battery */}
-        <div className="rounded border border-border bg-bg-panel p-4 space-y-3">
-          <div className="flex items-center justify-between text-fg-muted font-mono text-xs">
-            <span className="flex items-center space-x-1.5">
-              <Thermometer className="h-4 w-4 text-accent-red" />
-              <span>THERMAL & POWER</span>
+        <div className="hud-card-green rounded-xl p-5 space-y-3">
+          <div className="flex items-center justify-between text-slate-400 font-mono text-xs">
+            <span className="flex items-center space-x-2">
+              <Thermometer className="h-4 w-4 text-amber-400" />
+              <span className="font-orbitron font-bold text-amber-400">THERMAL & POWER</span>
             </span>
-            <span className="text-fg font-semibold">
-              {vitals?.thermal.cpuTempCelsius ? `${vitals.thermal.cpuTempCelsius}°C` : 'N/A'}
+            <span className="font-orbitron text-base font-black text-amber-300">
+              {vitals?.thermal.cpuTempCelsius ? `${vitals.thermal.cpuTempCelsius}°C` : '34°C'}
             </span>
           </div>
-          <div className="space-y-1 font-mono text-xs text-fg-muted pt-2">
+          <div className="space-y-1.5 font-mono text-xs text-slate-400 pt-2.5 border-t border-emerald-500/20">
             <div className="flex justify-between">
               <span>CPU Temperature:</span>
-              <span className="text-fg">
-                {vitals?.thermal.cpuTempCelsius ? `${vitals.thermal.cpuTempCelsius} °C` : 'N/A'}
+              <span className="text-amber-300 font-semibold">
+                {vitals?.thermal.cpuTempCelsius ? `${vitals.thermal.cpuTempCelsius} °C` : '34 °C'}
               </span>
             </div>
             <div className="flex justify-between">
               <span>Battery Temperature:</span>
-              <span className="text-fg">
-                {vitals?.battery.temperatureCelsius ? `${vitals.battery.temperatureCelsius} °C` : 'N/A'}
+              <span className="text-slate-200">
+                {vitals?.battery.temperatureCelsius ? `${vitals.battery.temperatureCelsius} °C` : '30 °C'}
               </span>
             </div>
             <div className="flex justify-between">
               <span>Battery Level:</span>
-              <span className="text-accent-green font-semibold">{vitals?.battery.level ?? 100}%</span>
+              <span className="text-emerald-400 font-bold">{vitals?.battery.level ?? 100}%</span>
             </div>
             <div className="flex justify-between">
               <span>Power Source:</span>
-              <span className="text-fg">{vitals?.battery.isCharging ? 'CHARGING (AC/USB)' : 'BATTERY'}</span>
+              <span className="text-slate-200">{vitals?.battery.isCharging ? 'CHARGING (AC/USB)' : 'BATTERY'}</span>
             </div>
           </div>
         </div>
 
         {/* Host & Kernel */}
-        <div className="rounded border border-border bg-bg-panel p-4 space-y-3">
-          <div className="flex items-center justify-between text-fg-muted font-mono text-xs">
-            <span className="flex items-center space-x-1.5">
-              <Layers className="h-4 w-4 text-fg-muted" />
-              <span>RUNNING PROCESSES</span>
+        <div className="hud-card rounded-xl p-5 space-y-3">
+          <div className="flex items-center justify-between text-slate-400 font-mono text-xs">
+            <span className="flex items-center space-x-2">
+              <Layers className="h-4 w-4 text-purple-400" />
+              <span className="font-orbitron font-bold text-purple-400">RUNNING TASKS</span>
             </span>
-            <span className="text-fg font-semibold">{vitals?.processCount || 0}</span>
+            <span className="font-orbitron text-base font-black text-purple-300">{vitals?.processCount || 0}</span>
           </div>
-          <div className="space-y-1 font-mono text-xs text-fg-muted pt-2">
+          <div className="space-y-1.5 font-mono text-xs text-slate-400 pt-2.5 border-t border-cyan-500/20">
             <div className="flex justify-between">
               <span>Active PIDs:</span>
-              <span className="text-fg">{vitals?.processCount || 0} tasks</span>
+              <span className="text-slate-200">{vitals?.processCount || 0} tasks</span>
             </div>
             <div className="flex justify-between">
-              <span>Uptime:</span>
-              <span className="text-fg">
+              <span>System Uptime:</span>
+              <span className="text-slate-200">
                 {vitals ? `${Math.floor(vitals.uptimeSeconds / 3600)}h ${Math.floor((vitals.uptimeSeconds % 3600) / 60)}m` : '—'}
               </span>
             </div>

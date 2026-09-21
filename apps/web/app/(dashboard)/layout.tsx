@@ -16,7 +16,7 @@ export default function DashboardLayout({
   const [user, setUser] = useState<UserProfile | null>(null);
   const [hostInfo, setHostInfo] = useState<{ ipAddress: string; model: string }>({
     ipAddress: '192.168.43.1',
-    model: 'OPPO',
+    model: 'Android Phone',
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isMobileOpen, setIsMobileOpen] = useState(false);

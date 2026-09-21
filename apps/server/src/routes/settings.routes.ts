@@ -20,7 +20,7 @@ settingsRouter.get('/', requirePermission(PERMISSIONS.SETTINGS_MANAGE), async (r
       storageRoot: CONFIG.STORAGE_ROOT,
       maxUploadSizeMb: CONFIG.MAX_UPLOAD_SIZE_MB.toString(),
       sessionTtlHours: CONFIG.SESSION_TTL_HOURS.toString(),
-      deviceName: 'OPPO Android Server',
+      deviceName: 'Android Personal Server',
       rateLimitAttempts: CONFIG.RATE_LIMIT_MAX_ATTEMPTS.toString(),
     };
 

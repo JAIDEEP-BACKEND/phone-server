@@ -2,7 +2,7 @@
 set -e
 
 echo "========================================================"
-echo "  OPPO ANDROID NAS & REMOTE CONTROL SERVER SETUP"
+echo "  ANDROID PHONE NAS & PERSONAL SERVER SETUP"
 echo "========================================================"
 
 echo "[1/6] Updating Termux packages..."

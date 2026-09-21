@@ -1,53 +1,54 @@
-# OPPO Android NAS & Personal Server
+# Android Phone NAS & Personal Server
 
-A lightweight, production-quality, self-hosted **Android NAS and Personal Server** running entirely inside **Termux** on an **OPPO Android phone** (ARM64, 128 GB internal storage).
+A lightweight, production-quality, self-hosted **Android NAS and Personal Server** running entirely inside **Termux** on an **Android phone** (ARM64, 128 GB internal storage).
 
-No external companion app, no root, and no complicated setup. Access your phone's storage, run an interactive web terminal, and monitor hardware in real time from any browser on the same network or direct phone hotspot.
-
----
-
-## Features
-
-- **NAS-Style File Manager**: Browse, upload, download, rename, move, copy, and delete files directly on `/storage/emulated/0` (DCIM, Pictures, Documents, Downloads).
-- **Web-Based Terminal**: Interactive xterm.js terminal with real PTY connection to the Termux bash shell.
-- **Real-Time Hardware Telemetry**: 1Hz live metrics for CPU %, RAM (from `/proc/meminfo`), storage capacity, network throughput, battery status, and uptime.
-- **Hotspot Mode (Zero Router)**: Turn on your phone's personal hotspot and connect your PC directly to `http://192.168.43.1:3001`.
-- **Security & RBAC**: Strict path traversal protection, bcrypt password hashing, IP rate limiting, and SQLite audit logging.
+Access storage files, web terminal console, real-time hardware telemetry, system management, and RBAC security from any computer, tablet, or phone connected to your phone's **Wi-Fi Hotspot** or home LAN without requiring root access.
 
 ---
 
-## Quick Start on Your Phone
+## ⚡ Key Highlights
+* **Zero Root Needed**: Runs in standard Termux environment.
+* **Direct Hotspot Access**: Emits its own Wi-Fi hotspot (`192.168.43.1:3001`) — works outdoors, off-grid, and anywhere with zero external router.
+* **Full NAS Storage**: Browse, upload large files (chunked streaming), download, delete, rename, and manage Android internal storage (`/sdcard`).
+* **Web Terminal Console**: Full interactive Termux PTY shell (`bash` / `sh`) over WebSocket with command quick-actions (`ls -la`, `df -h`, `free -m`, `uptime`, etc.).
+* **Real-time Telemetry (HUD / Sci-Fi FUI)**: Accurate CPU delta load, dynamic multi-zone thermal sensing, RAM breakdown, disk space, and battery levels.
+* **Auto-Recovery Daemon**: SIGHUP protection and persistent supervisor loop prevent Android background suspension.
+* **RBAC & Security**: Bcrypt-hashed credentials, JWT/cookie authentication, rate limiting, and SQLite audit logging.
 
-### 1. In Termux on Your Phone
+---
 
+## 🚀 Quick Setup on Phone (Termux)
+
+### Prerequisites
+Install **Termux** from [F-Droid](https://f-droid.org/en/packages/com.termux/) (do NOT use Google Play Store version as it is deprecated).
+
+### 1-Line Setup
+Open Termux and run:
 ```bash
-# Update and install Node.js & Git
-pkg update -y && pkg upgrade -y
-pkg install -y nodejs-lts git python make clang termux-api
-termux-setup-storage
-
-# Clone the repository
+pkg update && pkg install git nodejs-lts -y
 git clone https://github.com/JAIDEEP-BACKEND/phone-server.git
 cd phone-server
-
-# Run the setup script
 bash scripts/setup-termux.sh
+```
 
-# Start the server
+### Start Server
+```bash
+npm start
+```
+Or start persistent background daemon:
+```bash
 bash scripts/start.sh
 ```
 
 ---
 
-### 2. Connect via Phone Hotspot (Zero Router Needed)
-
-1. On your OPPO phone, turn on **Personal Hotspot** (in Settings → Connection & sharing).
+## 📱 Connecting via Hotspot
+1. On your phone, turn on **Personal Hotspot** (in Settings → Connection & sharing).
 2. Connect your PC / laptop / tablet Wi-Fi to your **phone's hotspot**.
 3. Open your browser and go to:
    ```text
    http://192.168.43.1:3001
    ```
-4. Create your administrator account on first visit and log in!
 
 ---
 
