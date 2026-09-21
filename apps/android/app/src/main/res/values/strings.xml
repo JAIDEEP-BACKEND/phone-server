@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">OPPO Server Companion</string>
+    <string name="accessibility_service_description">Enables remote touch gestures, navigation buttons, and lock screen execution from the self-hosted Android NAS web console.</string>
+</resources>

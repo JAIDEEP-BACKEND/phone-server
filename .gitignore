@@ -1,0 +1,17 @@
+node_modules/
+.next/
+dist/
+data/
+storage/
+*.tmp
+*.log
+.DS_Store
+Thumbs.db
+.env
+.idea/
+.vscode/
+build/
+.gradle/
+local.properties
+*.apk
+*.aab
