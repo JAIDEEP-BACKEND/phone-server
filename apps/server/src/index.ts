@@ -104,6 +104,17 @@ async function bootstrap() {
   app.use('/api/logs', logsRouter);
   app.use('/api/settings', settingsRouter);
 
+  // Captive Portal & Hotspot Helper Probes (Zero-Internet Hotspot Compatibility)
+  app.get(['/generate_204', '/gen_204'], (req, res) => {
+    res.status(204).end();
+  });
+  app.get(['/hotspot-detect.html', '/canonical.html', '/success.txt', '/library/test/success.html'], (req, res) => {
+    res.redirect('/');
+  });
+  app.get(['/ncsi.txt', '/connecttest.txt'], (req, res) => {
+    res.type('text/plain').send('Microsoft NCSI');
+  });
+
   // 5. Serve static Web Console frontend
   const webOutDir = path.resolve(__dirname, '../../web/out');
   if (fs.existsSync(webOutDir)) {
@@ -142,17 +153,19 @@ async function bootstrap() {
   server.listen(CONFIG.PORT, CONFIG.HOST, () => {
     const deviceInfo = DeviceInfoService.getDeviceInfo();
     console.log('====================================================');
-    console.log('  PHONE ANDROID NAS & PERSONAL SERVER - ACTIVE');
+    console.log('  🔥 PHONE HOTSPOT NAS & OFFLINE PERSONAL SERVER');
     console.log('====================================================');
-    console.log(`  Local Address:     http://localhost:${CONFIG.PORT}`);
-    console.log(`  LAN IP Address:    http://${deviceInfo.ipAddress}:${CONFIG.PORT}`);
-    console.log(`  Phone Hotspot AP:  http://192.168.43.1:${CONFIG.PORT} (Connect to phone's Wi-Fi hotspot)`);
-    console.log(`  Storage Root:      ${CONFIG.STORAGE_ROOT}`);
-    console.log(`  Database File:     ${CONFIG.DATABASE_PATH}`);
-    console.log(`  Architecture:      ${deviceInfo.architecture}`);
-    if (CONFIG.HOST === '0.0.0.0') {
-      console.log('  [NOTICE] Listening on 0.0.0.0 (Accessible to devices on hotspot or local network)');
+    console.log(`  📱 DIRECT HOTSPOT ACCESS:`);
+    console.log(`     👉 http://192.168.43.1:${CONFIG.PORT}`);
+    console.log(`  💻 PHONE LOCALHOST:`);
+    console.log(`     👉 http://localhost:${CONFIG.PORT}`);
+    if (deviceInfo.ipAddress && deviceInfo.ipAddress !== '127.0.0.1' && deviceInfo.ipAddress !== '192.168.43.1') {
+      console.log(`  🌐 OTHER NETWORK / LAN IP:`);
+      console.log(`     👉 http://${deviceInfo.ipAddress}:${CONFIG.PORT}`);
     }
+    console.log('----------------------------------------------------');
+    console.log('  ⚡ Mode: 100% Offline Direct Wi-Fi (No Internet Needed)');
+    console.log(`  📂 Storage Root: ${CONFIG.STORAGE_ROOT}`);
     console.log('====================================================');
   });
 }
