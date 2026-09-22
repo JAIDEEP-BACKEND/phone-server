@@ -45,6 +45,17 @@ if [ -f .env ]; then
   export $(cat .env | grep -v '#' | xargs 2>/dev/null)
 fi
 
+# Ensure port is 3001
+if [ "$PORT" = "3000" ] || [ -z "$PORT" ]; then
+  PORT="3001"
+  export PORT="3001"
+fi
+
+# Auto-free port if occupied by a stale node process
+if command -v fuser &> /dev/null; then
+  fuser -k "${PORT}/tcp" 2>/dev/null || true
+fi
+
 # 4. Ensure server is built
 if [ ! -f "apps/server/dist/index.js" ]; then
   echo "[BUILD] Building server and shared packages..."

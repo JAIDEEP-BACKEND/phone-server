@@ -129,6 +129,16 @@ async function bootstrap() {
   });
 
   // 7. Start Listener
+  server.on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`\n[FATAL] Port ${CONFIG.PORT} is already in use (EADDRINUSE).`);
+      console.error(`[FIX] In Termux, run: killall node  (or: fuser -k ${CONFIG.PORT}/tcp)`);
+      process.exit(1);
+    }
+    console.error('[FATAL] Server listener error:', err);
+    process.exit(1);
+  });
+
   server.listen(CONFIG.PORT, CONFIG.HOST, () => {
     const deviceInfo = DeviceInfoService.getDeviceInfo();
     console.log('====================================================');

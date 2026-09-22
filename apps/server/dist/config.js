@@ -20,7 +20,7 @@ if (!fs_1.default.existsSync(defaultStorageRoot)) {
     }
 }
 exports.CONFIG = {
-    PORT: parseInt(process.env.PORT || '3001', 10),
+    PORT: (process.env.PORT && process.env.PORT !== '3000') ? parseInt(process.env.PORT, 10) : 3001,
     HOST: process.env.HOST || '0.0.0.0',
     NODE_ENV: process.env.NODE_ENV || 'development',
     IS_ANDROID: isAndroid,
