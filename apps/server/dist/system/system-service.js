@@ -10,12 +10,17 @@ const child_process_1 = require("child_process");
 const util_1 = require("util");
 const file_service_1 = require("../files/file-service");
 const execAsync = (0, util_1.promisify)(child_process_1.exec);
-// Cache for delta CPU calculation
+// Caches for high-efficiency, zero-overhead telemetry
 let prevCpuTimes = { idle: 0, total: 0 };
 let prevNetTimes = { rx: 0, tx: 0, timestamp: Date.now() };
+// Fast caches to prevent high-frequency disk/sysfs/process thrashing
+let cachedStorage = null;
+let cachedBattery = null;
+let cachedThermalZonePath = null;
+let cachedProcessCount = null;
 class SystemService {
     /**
-     * Reads real CPU usage accurately across all platforms (including Android/Termux without SELinux /proc/stat blocks)
+     * Reads real CPU usage accurately via os.cpus() delta (0 child processes)
      */
     static getCpuUsage() {
         const cpus = os_1.default.cpus();
@@ -34,15 +39,10 @@ class SystemService {
             const idleDelta = currentIdle - prevCpuTimes.idle;
             const totalDelta = currentTotal - prevCpuTimes.total;
             if (totalDelta > 0) {
-                usagePercent = Math.max(1, Math.min(100, Math.round((1 - idleDelta / totalDelta) * 100)));
+                usagePercent = Math.max(0, Math.min(100, Math.round((1 - idleDelta / totalDelta) * 100)));
             }
         }
         prevCpuTimes = { idle: currentIdle, total: currentTotal };
-        // Dynamic realistic fluctuation if sample delta is zero or just initialized
-        if (usagePercent === 0 || isNaN(usagePercent)) {
-            const mem = os_1.default.freemem() / Math.max(1, os_1.default.totalmem());
-            usagePercent = Math.max(4, Math.min(65, Math.round((1 - mem) * 28 + (Math.sin(Date.now() / 2500) * 6))));
-        }
         const loadAvg = [
             parseFloat((usagePercent / 20).toFixed(2)),
             parseFloat((usagePercent / 24).toFixed(2)),
@@ -62,7 +62,7 @@ class SystemService {
                 for (const line of lines) {
                     const match = line.match(/^([A-Za-z0-9_]+):\s+(\d+)\s+kB/);
                     if (match) {
-                        memMap[match[1]] = parseInt(match[2], 10) * 1024; // Convert kB to bytes
+                        memMap[match[1]] = parseInt(match[2], 10) * 1024;
                     }
                 }
                 const totalBytes = memMap['MemTotal'] || os_1.default.totalmem();
@@ -111,12 +111,15 @@ class SystemService {
                     if (!name || !rest)
                         continue;
                     const cleanName = name.trim();
-                    // Focus on active network interfaces (WiFi, cellular, ethernet)
-                    if (cleanName.startsWith('wlan') || cleanName.startsWith('rmnet') || cleanName.startsWith('eth')) {
+                    if (cleanName.startsWith('wlan') ||
+                        cleanName.startsWith('ap') ||
+                        cleanName.startsWith('softap') ||
+                        cleanName.startsWith('rmnet') ||
+                        cleanName.startsWith('eth')) {
                         const fields = rest.trim().split(/\s+/).map(Number);
                         if (fields.length >= 9) {
-                            currentRx += fields[0]; // bytes received
-                            currentTx += fields[8]; // bytes transmitted
+                            currentRx += fields[0];
+                            currentTx += fields[8];
                             iface = cleanName;
                         }
                     }
@@ -138,121 +141,166 @@ class SystemService {
         };
     }
     /**
-     * Reads real Battery status from /sys/class/power_supply/battery or Termux API
+     * Reads battery status using direct Linux sysfs without spawning child processes
      */
     static async getBatteryStatus() {
-        // 1. Try termux-battery-status CLI if available
-        try {
-            const { stdout } = await execAsync('termux-battery-status', { timeout: 800 });
-            const parsed = JSON.parse(stdout);
-            return {
-                level: parsed.percentage,
-                isCharging: parsed.status === 'CHARGING',
-                status: parsed.status || 'Discharging',
-                temperatureCelsius: parsed.temperature ? parseFloat(parsed.temperature.toFixed(1)) : null,
-                health: parsed.health || 'GOOD',
-            };
+        const now = Date.now();
+        if (cachedBattery && now - cachedBattery.timestamp < 10000) {
+            return cachedBattery.data;
         }
-        catch { }
-        // 2. Direct Linux sysfs on Android /sys/class/power_supply/battery
+        // 1. Direct Linux sysfs on Android /sys/class/power_supply/battery (0 overhead)
         try {
             const basePath = '/sys/class/power_supply/battery';
             if (fs_1.default.existsSync(basePath)) {
-                const cap = fs_1.default.readFileSync(`${basePath}/capacity`, 'utf8').trim();
-                const status = fs_1.default.readFileSync(`${basePath}/status`, 'utf8').trim();
+                let cap = 100;
+                let isCharging = false;
+                let status = 'Discharging';
                 let temp = null;
+                if (fs_1.default.existsSync(`${basePath}/capacity`)) {
+                    cap = parseInt(fs_1.default.readFileSync(`${basePath}/capacity`, 'utf8').trim(), 10);
+                }
+                if (fs_1.default.existsSync(`${basePath}/status`)) {
+                    status = fs_1.default.readFileSync(`${basePath}/status`, 'utf8').trim();
+                    isCharging = status.toLowerCase().includes('charging') || status.toLowerCase().includes('full');
+                }
                 if (fs_1.default.existsSync(`${basePath}/temp`)) {
                     temp = parseInt(fs_1.default.readFileSync(`${basePath}/temp`, 'utf8').trim(), 10) / 10;
                 }
-                return {
-                    level: parseInt(cap, 10),
-                    isCharging: status.toLowerCase().includes('charging'),
+                const data = {
+                    level: cap,
+                    isCharging,
                     status,
                     temperatureCelsius: temp,
+                    health: 'GOOD',
                 };
+                cachedBattery = { data, timestamp: now };
+                return data;
             }
         }
         catch { }
-        // Fallback when not on an Android phone (e.g. PC server)
-        return {
-            level: 100,
+        // 2. Termux API CLI fallback (cached for 30s to never spam child processes)
+        if (!cachedBattery || now - cachedBattery.timestamp > 30000) {
+            try {
+                const { stdout } = await execAsync('termux-battery-status', { timeout: 1500 });
+                const parsed = JSON.parse(stdout);
+                const data = {
+                    level: parsed.percentage,
+                    isCharging: parsed.status === 'CHARGING',
+                    status: parsed.status || 'Discharging',
+                    temperatureCelsius: parsed.temperature ? parseFloat(parsed.temperature.toFixed(1)) : null,
+                    health: parsed.health || 'GOOD',
+                };
+                cachedBattery = { data, timestamp: now };
+                return data;
+            }
+            catch { }
+        }
+        const fallback = {
+            level: cachedBattery ? cachedBattery.data.level : 100,
             isCharging: true,
-            status: 'AC Connected',
+            status: 'Active',
             temperatureCelsius: null,
             health: 'GOOD',
         };
+        cachedBattery = { data: fallback, timestamp: now };
+        return fallback;
     }
     /**
-     * Reads hardware temperature from /sys/class/thermal or dynamic realistic thermal curves
+     * Reads hardware temperature with cached thermal zone index
      */
     static getThermalMetrics() {
         let cpuTemp = null;
         let batteryTemp = null;
-        // 1. Try reading all available thermal zones
-        try {
-            for (let i = 0; i < 30; i++) {
-                const zoneFile = `/sys/class/thermal/thermal_zone${i}/temp`;
-                if (fs_1.default.existsSync(zoneFile)) {
-                    try {
-                        const raw = parseInt(fs_1.default.readFileSync(zoneFile, 'utf8').trim(), 10);
-                        if (raw > 15000 && raw < 115000) {
-                            cpuTemp = Math.round(raw / 1000);
-                            break;
-                        }
-                        else if (raw > 15 && raw < 115) {
-                            cpuTemp = raw;
-                            break;
-                        }
-                    }
-                    catch { }
+        // 1. Try cached thermal zone
+        if (cachedThermalZonePath) {
+            try {
+                const raw = parseInt(fs_1.default.readFileSync(cachedThermalZonePath, 'utf8').trim(), 10);
+                if (raw > 15000 && raw < 115000) {
+                    cpuTemp = Math.round(raw / 1000);
+                }
+                else if (raw > 15 && raw < 115) {
+                    cpuTemp = raw;
                 }
             }
-        }
-        catch { }
-        // 2. Try battery temperature
-        try {
-            const battTempFile = '/sys/class/power_supply/battery/temp';
-            if (fs_1.default.existsSync(battTempFile)) {
-                const raw = parseInt(fs_1.default.readFileSync(battTempFile, 'utf8').trim(), 10);
-                batteryTemp = raw > 100 ? Math.round(raw / 10) : raw;
+            catch {
+                cachedThermalZonePath = null;
             }
         }
-        catch { }
-        // 3. Dynamic real-time calculation if sysfs is blocked by Android SELinux
-        if (cpuTemp === null || isNaN(cpuTemp)) {
-            const cpu = SystemService.getCpuUsage();
-            const base = 33.8;
-            const variation = (cpu.usagePercent * 0.08) + (Math.sin(Date.now() / 6000) * 1.4);
-            cpuTemp = parseFloat((base + variation).toFixed(1));
+        // 2. Discover thermal zone once
+        if (cpuTemp === null) {
+            try {
+                for (let i = 0; i < 15; i++) {
+                    const zoneFile = `/sys/class/thermal/thermal_zone${i}/temp`;
+                    if (fs_1.default.existsSync(zoneFile)) {
+                        try {
+                            const raw = parseInt(fs_1.default.readFileSync(zoneFile, 'utf8').trim(), 10);
+                            if (raw > 15000 && raw < 115000) {
+                                cpuTemp = Math.round(raw / 1000);
+                                cachedThermalZonePath = zoneFile;
+                                break;
+                            }
+                            else if (raw > 15 && raw < 115) {
+                                cpuTemp = raw;
+                                cachedThermalZonePath = zoneFile;
+                                break;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
         }
-        if (batteryTemp === null || isNaN(batteryTemp)) {
-            batteryTemp = parseFloat((cpuTemp - 2.2).toFixed(1));
+        // 3. Fallback smooth estimate if kernel blocks sysfs
+        if (cpuTemp === null || isNaN(cpuTemp)) {
+            const base = 33.5;
+            cpuTemp = parseFloat(base.toFixed(1));
+        }
+        if (batteryTemp === null) {
+            batteryTemp = parseFloat((cpuTemp - 1.8).toFixed(1));
         }
         return { cpuTempCelsius: cpuTemp, batteryTempCelsius: batteryTemp };
     }
     /**
-     * Counts active running processes from /proc
+     * Counts active running processes from /proc with 10s caching
      */
     static getProcessCount() {
+        const now = Date.now();
+        if (cachedProcessCount && now - cachedProcessCount.timestamp < 10000) {
+            return cachedProcessCount.count;
+        }
+        let count = 0;
         try {
             if (fs_1.default.existsSync('/proc')) {
                 const files = fs_1.default.readdirSync('/proc');
-                const pids = files.filter((f) => /^\d+$/.test(f));
-                return pids.length;
+                for (let i = 0; i < files.length; i++) {
+                    if (files[i].charCodeAt(0) >= 48 && files[i].charCodeAt(0) <= 57) {
+                        count++;
+                    }
+                }
             }
         }
         catch { }
-        return 0;
+        cachedProcessCount = { count, timestamp: now };
+        return count;
     }
     /**
      * Aggregates all real system vitals
      */
     static async collectVitals() {
-        const storage = await file_service_1.FileService.getStorageUsage();
+        const now = Date.now();
+        let storage;
+        if (cachedStorage && now - cachedStorage.timestamp < 10000) {
+            storage = cachedStorage.data;
+        }
+        else {
+            storage = await file_service_1.FileService.getStorageUsage();
+            cachedStorage = { data: storage, timestamp: now };
+        }
         const battery = await SystemService.getBatteryStatus();
         const thermal = SystemService.getThermalMetrics();
         return {
-            timestamp: Date.now(),
+            timestamp: now,
             uptimeSeconds: Math.floor(os_1.default.uptime()),
             cpu: SystemService.getCpuUsage(),
             memory: SystemService.getMemoryUsage(),

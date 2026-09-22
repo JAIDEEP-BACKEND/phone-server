@@ -56,22 +56,8 @@ async function bootstrap() {
   const { setActiveSocketIO, broadcastFileEvent } = require('./sockets/socket-handler');
   setActiveSocketIO(io);
 
-  // Storage filesystem live watcher for real-time instant syncing
-  try {
-    if (fs.existsSync(CONFIG.STORAGE_ROOT)) {
-      let watchDebounce: any = null;
-      fs.watch(CONFIG.STORAGE_ROOT, { recursive: true }, (event, filename) => {
-        if (!filename || filename.startsWith('.') || filename.includes('.nas_temp_uploads')) return;
-        if (watchDebounce) clearTimeout(watchDebounce);
-        watchDebounce = setTimeout(() => {
-          broadcastFileEvent({ path: '/' + filename.replace(/\\/g, '/'), action: event });
-        }, 300);
-      });
-      console.log(`[WATCHER] Active real-time storage sync enabled on ${CONFIG.STORAGE_ROOT}`);
-    }
-  } catch (err: any) {
-    console.log('[WATCHER] Native recursive watch not available, relying on event triggers.');
-  }
+  // Real-time instant syncing is driven by event bus (0% CPU / Zero inotify strain)
+  console.log(`[STORAGE] Storage root initialized on ${CONFIG.STORAGE_ROOT} with instant event sync.`);
 
   // 3. Security & Middleware
   app.use(

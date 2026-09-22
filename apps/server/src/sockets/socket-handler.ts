@@ -84,7 +84,7 @@ export function setupSocketIO(io: SocketIOServer) {
     });
   });
 
-  // 3. Background System Telemetry Pulse (1 second interval)
+  // 3. Low-Power System Telemetry Pulse (Only fires when dashboard is open)
   setInterval(async () => {
     try {
       const clientsInSystemRoom = await io.in('room:system').fetchSockets();
@@ -95,7 +95,7 @@ export function setupSocketIO(io: SocketIOServer) {
     } catch (err) {
       console.error('[SOCKET] Telemetry broadcast error:', err);
     }
-  }, 1000);
+  }, 2500);
 }
 
 let activeSocketIO: SocketIOServer | null = null;

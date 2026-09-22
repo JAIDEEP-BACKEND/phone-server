@@ -78,7 +78,7 @@ function setupSocketIO(io) {
             pty_service_1.PtyService.destroySession(socket.id);
         });
     });
-    // 3. Background System Telemetry Pulse (1 second interval)
+    // 3. Low-Power System Telemetry Pulse (Only fires when dashboard is open)
     setInterval(async () => {
         try {
             const clientsInSystemRoom = await io.in('room:system').fetchSockets();
@@ -90,7 +90,7 @@ function setupSocketIO(io) {
         catch (err) {
             console.error('[SOCKET] Telemetry broadcast error:', err);
         }
-    }, 1000);
+    }, 2500);
 }
 let activeSocketIO = null;
 function setActiveSocketIO(io) {
