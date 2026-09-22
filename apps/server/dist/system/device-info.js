@@ -26,20 +26,33 @@ class DeviceInfoService {
         const totalRamBytes = os_1.default.totalmem();
         const totalStorageBytes = 128 * 1024 * 1024 * 1024;
         // Discover LAN and Hotspot IPs
-        let ipAddress = '127.0.0.1';
-        let hotspotIp = null;
+        let ipAddress = '10.78.153.85';
+        let detectedIps = [];
         const networkInterfaces = os_1.default.networkInterfaces();
         for (const name of Object.keys(networkInterfaces)) {
             for (const net of networkInterfaces[name] || []) {
                 if (!net.internal && net.family === 'IPv4') {
-                    if (net.address.startsWith('192.168.43.') || name.includes('ap') || name.includes('softap')) {
-                        hotspotIp = net.address;
-                    }
-                    else if (ipAddress === '127.0.0.1') {
+                    detectedIps.push(net.address);
+                    // Prioritize known hotspot / active cellular / Wi-Fi subnet interfaces
+                    if (net.address.startsWith('10.') ||
+                        net.address.startsWith('192.168.43.') ||
+                        net.address.startsWith('192.168.') ||
+                        name.includes('ap') ||
+                        name.includes('softap') ||
+                        name.includes('wlan') ||
+                        name.includes('swlan') ||
+                        name.includes('rndis') ||
+                        name.includes('rmnet')) {
                         ipAddress = net.address;
                     }
                 }
             }
+        }
+        if (process.env.HOTSPOT_IP) {
+            ipAddress = process.env.HOTSPOT_IP;
+        }
+        else if (detectedIps.length > 0 && !detectedIps.includes(ipAddress)) {
+            ipAddress = detectedIps[0];
         }
         return {
             manufacturer,
@@ -52,7 +65,7 @@ class DeviceInfoService {
             totalStorageBytes,
             screenResolution: '1080 x 2400',
             refreshRateHz: 90,
-            ipAddress: hotspotIp || ipAddress,
+            ipAddress,
             hostname: os_1.default.hostname(),
         };
     }

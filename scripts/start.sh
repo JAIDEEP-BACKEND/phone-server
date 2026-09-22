@@ -68,12 +68,18 @@ echo ""
 echo "=========================================================="
 echo "  SERVER ACTIVE & LISTENING ON PORT $PORT"
 echo "=========================================================="
-echo "  Direct Phone Hotspot: http://192.168.43.1:$PORT"
-WLAN_IP=$(ip -4 addr show wlan0 2>/dev/null | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | head -n 1)
-if [ -n "$WLAN_IP" ]; then
-  echo "  Home Wi-Fi Network:   http://$WLAN_IP:$PORT"
+echo "  Direct Phone Hotspot: http://10.78.153.85:$PORT"
+
+# Detect all active IPv4 interfaces on device
+ALL_IPS=$(ip -4 addr show 2>/dev/null | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v '127.0.0.1' || true)
+if [ -n "$ALL_IPS" ]; then
+  for IP in $ALL_IPS; do
+    if [ "$IP" != "10.78.153.85" ]; then
+      echo "  Network Address:      http://$IP:$PORT"
+    fi
+  done
 fi
-echo "  Local Device:         http://localhost:$PORT"
+echo "  Localhost on Phone:   http://localhost:$PORT"
 echo "=========================================================="
 echo "  [TIP] To prevent Android from ever closing the server:"
 echo "  Go to Android Settings -> Apps -> Termux -> Battery"

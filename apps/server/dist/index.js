@@ -144,13 +144,12 @@ async function bootstrap() {
         console.log('  🔥 PHONE HOTSPOT NAS & OFFLINE PERSONAL SERVER');
         console.log('====================================================');
         console.log(`  📱 DIRECT HOTSPOT ACCESS:`);
-        console.log(`     👉 http://192.168.43.1:${config_1.CONFIG.PORT}`);
-        console.log(`  💻 PHONE LOCALHOST:`);
-        console.log(`     👉 http://localhost:${config_1.CONFIG.PORT}`);
-        if (deviceInfo.ipAddress && deviceInfo.ipAddress !== '127.0.0.1' && deviceInfo.ipAddress !== '192.168.43.1') {
-            console.log(`  🌐 OTHER NETWORK / LAN IP:`);
+        console.log(`     👉 http://10.78.153.85:${config_1.CONFIG.PORT}`);
+        if (deviceInfo.ipAddress && deviceInfo.ipAddress !== '10.78.153.85' && deviceInfo.ipAddress !== '127.0.0.1') {
             console.log(`     👉 http://${deviceInfo.ipAddress}:${config_1.CONFIG.PORT}`);
         }
+        console.log(`  💻 PHONE LOCALHOST:`);
+        console.log(`     👉 http://localhost:${config_1.CONFIG.PORT}`);
         console.log('----------------------------------------------------');
         console.log('  ⚡ Mode: 100% Offline Direct Wi-Fi (No Internet Needed)');
         console.log(`  📂 Storage Root: ${config_1.CONFIG.STORAGE_ROOT}`);

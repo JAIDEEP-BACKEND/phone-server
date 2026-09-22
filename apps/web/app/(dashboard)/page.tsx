@@ -117,7 +117,11 @@ export default function DashboardPage() {
           <div className="flex items-center space-x-2 font-mono text-xs text-fg-muted bg-black/40 border border-white/10 rounded-xl px-3 py-2 shrink-0">
             <Radio className="h-3.5 w-3.5 text-accent-blue animate-pulse" />
             <span>Hotspot IP:</span>
-            <span className="text-accent-blue font-bold">192.168.43.1:3001</span>
+            <span className="text-accent-blue font-bold">
+              {typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
+                ? `${window.location.hostname}:3001`
+                : '10.78.153.85:3001'}
+            </span>
           </div>
         </div>
       </div>
